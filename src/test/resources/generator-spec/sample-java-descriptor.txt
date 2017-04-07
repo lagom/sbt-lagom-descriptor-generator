@@ -1,0 +1,30 @@
+package com.example.pet.api;
+
+import static com.lightbend.lagom.javadsl.api.Service.*;
+import com.lightbend.lagom.javadsl.api.*;
+import com.lightbend.lagom.javadsl.api.transport.*;
+import com.example.pet.api.Pet;
+import com.example.pet.api.ModelApiResponse;
+
+public interface PetApi extends Service {
+
+    ServiceCall<Pet, akka.Done> addPet();
+    ServiceCall<akka.NotUsed, akka.Done> deletePet(long petId);
+    ServiceCall<akka.NotUsed, org.pcollections.PSequence<Pet>> findPetsByStatus(org.pcollections.PSequence<String> status);
+    ServiceCall<akka.NotUsed, org.pcollections.PSequence<Pet>> findPetsByTags(org.pcollections.PSequence<String> tags);
+    ServiceCall<akka.NotUsed, Pet> getPetById(long petId);
+    ServiceCall<Pet, akka.Done> updatePet();
+    ServiceCall<akka.NotUsed, akka.Done> updatePetWithForm(long petId);
+
+    default Descriptor descriptor() {
+        return named("pet").withCalls(
+                restCall(Method.POST, "/v2/pet", this::addPet),
+                restCall(Method.DELETE, "/v2/pet/:petId", this::deletePet),
+                restCall(Method.GET, "/v2/pet/findByStatus?status", this::findPetsByStatus),
+                restCall(Method.GET, "/v2/pet/findByTags?tags", this::findPetsByTags),
+                restCall(Method.GET, "/v2/pet/:petId", this::getPetById),
+                restCall(Method.PUT, "/v2/pet", this::updatePet),
+                restCall(Method.POST, "/v2/pet/:petId", this::updatePetWithForm)
+        );
+    }
+}
