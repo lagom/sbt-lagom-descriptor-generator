@@ -3,45 +3,43 @@ package com.lightbend.lagom.generator
 import java.io.InputStream
 
 sealed trait LagomGenerator {
-  val service: Service
-  val packageDeclaration: String
+  def packageDeclaration(service: Service): String
   val lagomImports: String
-  val customImports: String
+  def customImports(service: Service): String
 
-  val interfaceName = s"${service.name.head.toUpper}${service.name.tail.map(_.toLower)}Api"
+  def interfaceName(service: Service): String = s"${service.name.head.toUpper}${service.name.tail.map(_.toLower)}Api"
 
   def argument(arg: CallArgument): String
-  val methodHandlers: String
-  val callDescriptions: String
-  val descriptor: String
-  val serviceDefinition: String
+  def methodHandlers(calls: Seq[Call]): String
+  def callDescriptions(calls: Seq[Call]): String
+  def descriptor(service: Service): String
+  def serviceDefinition(service: Service): String
 
-  def generate: String =
-    s"""$packageDeclaration
+  def generate(service: Service): String =
+    s"""${packageDeclaration(service)}
        |
        |$lagomImports
-       |$customImports
+       |${customImports(service)}
        |
-       |$serviceDefinition
+       |${serviceDefinition(service)}
        |""".stripMargin.trim
 
   protected def importWriter(fqcns: Seq[String]): String
 
 }
 
-final class LagomJavaLagomGenerator(val service: Service) extends LagomGenerator {
+final object LagomJavaGenerator extends LagomGenerator {
 
-  override val packageDeclaration: String = s"package ${service.`package`};"
+  override def packageDeclaration(service: Service): String = s"package ${service.`package`};"
 
   override val lagomImports: String = importWriter(Seq(
     "static com.lightbend.lagom.javadsl.api.Service.*",
     "com.lightbend.lagom.javadsl.api.*",
     "com.lightbend.lagom.javadsl.api.transport.*"
   ))
-  override val customImports: String = importWriter(service.customModels.map(name => s"${service.`package`}.$name"))
-
+  override def customImports(service: Service): String = importWriter(service.customModels.map(name => s"${service.`package`}.$name"))
   override def argument(arg: CallArgument): String = s"${arg.`type`} ${arg.name}"
-  val methodHandlers: String = service.calls.map { call =>
+  override def methodHandlers(calls: Seq[Call]): String = calls.map { call =>
     val req = call.requestType.getOrElse("akka.NotUsed")
     val resp = call.responseType.getOrElse("akka.Done")
     val args = call.arguments.map(argument).mkString(", ")
@@ -50,22 +48,22 @@ final class LagomJavaLagomGenerator(val service: Service) extends LagomGenerator
     .map { x => s"    $x" }
     .mkString("\n")
 
-  override val callDescriptions = service.calls.map { call =>
+  override def callDescriptions(calls: Seq[Call]): String = calls.map { call =>
     s"""                restCall(Method.${call.method.name}, "${call.path}", this::${call.name})"""
   }.mkString(",\n")
 
-  override val descriptor = s"""named("${service.name}").withCalls(
-     |$callDescriptions
+  override def descriptor(service: Service) = s"""named("${service.name}").withCalls(
+     |${callDescriptions(service.calls)}
      |        );
       """.stripMargin.trim
 
-  override val serviceDefinition = s"""
-     |public interface $interfaceName extends Service {
+  override def serviceDefinition(service: Service) = s"""
+     |public interface ${interfaceName(service)} extends Service {
      |
-     |$methodHandlers
+     |${methodHandlers(service.calls)}
      |
      |    default Descriptor descriptor() {
-     |        return $descriptor
+     |        return ${descriptor(service)}
      |    }
      |}""".stripMargin.trim
 
@@ -91,9 +89,8 @@ object LagomGenerator {
       Seq("Pet", "ModelApiResponse"),
       Seq(addPetCall, detelePet, findPetsByStatus, findPetsByTags, getPetById, updatePet, updatePetWithFor))
 
-    val generator = new LagomJavaLagomGenerator(service)
+    LagomJavaGenerator.generate(service)
 
-    generator.generate
   }
 
 }
