@@ -1,0 +1,1 @@
+# sbt-lagom-descriptor-generator
