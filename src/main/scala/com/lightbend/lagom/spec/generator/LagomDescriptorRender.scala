@@ -3,8 +3,9 @@ package com.lightbend.lagom.spec.generator
 import java.io.InputStream
 
 import com.lightbend.lagom.spec.parser.OpenApiV2Parser
+import io.swagger.models.Swagger
 
-sealed trait LagomGenerator {
+sealed trait LagomDescriptorRender {
   def packageDeclaration(service: Service): String
 
   val lagomImports: String
@@ -23,7 +24,7 @@ sealed trait LagomGenerator {
 
   def serviceDefinition(service: Service): String
 
-  def generate(service: Service): String =
+  def render(service: Service): String =
     s"""${packageDeclaration(service)}
        |
        |$lagomImports
@@ -36,7 +37,7 @@ sealed trait LagomGenerator {
 
 }
 
-object LagomJavaGenerator extends LagomGenerator {
+object JavaLagomDescriptorRender extends LagomDescriptorRender {
 
   override def packageDeclaration(service: Service): String = s"package ${service.`package`};"
 
@@ -97,9 +98,10 @@ object LagomGenerator {
 
   def generateFor(inputStream: InputStream): String = {
 
-    val service = OpenApiV2Parser.parse(inputStream)
+    val openApiV2 = new OpenApiV2Parser("com.example")
+    val service = openApiV2.read(inputStream)
 
-    LagomJavaGenerator.generate(service)
+    JavaLagomDescriptorRender.render(service)
 
   }
 
