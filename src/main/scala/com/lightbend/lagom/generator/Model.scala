@@ -19,6 +19,7 @@ object Method {
   case object DELETE extends Method("DELETE")
   case object OPTIONS extends Method("OPTIONS")
   case object PATCH extends Method("PATCH")
+  case object HEAD extends Method("HEAD")
 }
 
 case class Service(

@@ -82,7 +82,39 @@ class LagomJavaGeneratorSpec extends FlatSpec with Matchers {
     handler should include("(long id, String name);")
   }
 
-  // TODO: continue unit tests with call descriptors
-  // TODO: continue unit tests with call description (assert calls section is added or not)
+  it should s"generate a method call with the proper HTTP method" in {
+    val call = Call(Method.GET, "", "")
+    val handler = LagomJavaGenerator.callDescription(call)
+    handler should include("Method.GET")
+  }
+
+  it should s"generate a method call for the provided path" in {
+    val path = "/some/path"
+    val call = Call(Method.GET, path, "")
+    val handler = LagomJavaGenerator.callDescription(call)
+    handler should include(path)
+  }
+
+  it should s"use the generated method handler" in {
+    val handleName = "handleName"
+    val call = Call(Method.GET, "/some/path", handleName)
+    val handler = LagomJavaGenerator.callDescription(call)
+    handler should include(handleName)
+  }
+
+  it should s"include calls if there are any" in {
+    val call = Call(Method.GET, "/path", "methodHandler")
+    val service = Service("com.example", "name", calls = Seq(call))
+
+    val handler = LagomJavaGenerator.descriptor(service)
+    handler should include("withCalls")
+  }
+
+  it should s"not include calls if there are none" in {
+    val service = Service("com.example", "name")
+
+    val handler = LagomJavaGenerator.descriptor(service)
+    handler should not include ("withCalls")
+  }
 
 }

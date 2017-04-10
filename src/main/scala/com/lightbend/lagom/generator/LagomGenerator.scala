@@ -4,15 +4,21 @@ import java.io.InputStream
 
 sealed trait LagomGenerator {
   def packageDeclaration(service: Service): String
+
   val lagomImports: String
+
   def customImports(service: Service): String
 
   def interfaceName(service: Service): String = s"${service.name.head.toUpper}${service.name.tail.map(_.toLower)}Api"
 
   def argument(arg: CallArgument): String
+
   def methodHandlers(calls: Seq[Call]): String
-  def callDescriptions(calls: Seq[Call]): String
+
+  def callDescription(call: Call): String
+
   def descriptor(service: Service): String
+
   def serviceDefinition(service: Service): String
 
   def generate(service: Service): String =
@@ -28,7 +34,7 @@ sealed trait LagomGenerator {
 
 }
 
-final object LagomJavaGenerator extends LagomGenerator {
+object LagomJavaGenerator extends LagomGenerator {
 
   override def packageDeclaration(service: Service): String = s"package ${service.`package`};"
 
@@ -37,8 +43,11 @@ final object LagomJavaGenerator extends LagomGenerator {
     "com.lightbend.lagom.javadsl.api.*",
     "com.lightbend.lagom.javadsl.api.transport.*"
   ))
+
   override def customImports(service: Service): String = importWriter(service.customModels.map(name => s"${service.`package`}.$name"))
+
   override def argument(arg: CallArgument): String = s"${arg.`type`} ${arg.name}"
+
   override def methodHandlers(calls: Seq[Call]): String = calls.map { call =>
     val req = call.requestType.getOrElse("akka.NotUsed")
     val resp = call.responseType.getOrElse("akka.Done")
@@ -48,24 +57,33 @@ final object LagomJavaGenerator extends LagomGenerator {
     .map { x => s"    $x" }
     .mkString("\n")
 
-  override def callDescriptions(calls: Seq[Call]): String = calls.map { call =>
+  override def callDescription(call: Call): String =
     s"""                restCall(Method.${call.method.name}, "${call.path}", this::${call.name})"""
-  }.mkString(",\n")
 
-  override def descriptor(service: Service) = s"""named("${service.name}").withCalls(
-     |${callDescriptions(service.calls)}
-     |        );
-      """.stripMargin.trim
+  override def descriptor(service: Service) = {
+    val withCalls =
+      if (service.calls.nonEmpty)
+        service.calls
+          .map(callDescription)
+          .mkString(".withCalls(\n", ",\n", "\n        )")
+      else
+        ""
 
-  override def serviceDefinition(service: Service) = s"""
-     |public interface ${interfaceName(service)} extends Service {
-     |
-     |${methodHandlers(service.calls)}
-     |
-     |    default Descriptor descriptor() {
-     |        return ${descriptor(service)}
-     |    }
-     |}""".stripMargin.trim
+    s"""named("${service.name}")$withCalls;"""
+  }
+
+  private def tabs(count: Int)(input: String): String = " " * count + input
+
+  override def serviceDefinition(service: Service) =
+    s"""
+       |public interface ${interfaceName(service)} extends Service {
+       |
+       |${methodHandlers(service.calls)}
+       |
+       |    default Descriptor descriptor() {
+       |        return ${descriptor(service)}
+       |    }
+       |}""".stripMargin.trim
 
   override def importWriter(fqcns: Seq[String]): String = {
     fqcns.map(fqcn => s"import $fqcn;").mkString("\n")
@@ -76,6 +94,8 @@ final object LagomJavaGenerator extends LagomGenerator {
 object LagomGenerator {
 
   def generateFor(inputStream: InputStream): String = {
+
+    // TODO: read swagger.json from inputStream into an instance of Service --> remove the following hardcoded data.
 
     val addPetCall = Call(Method.POST, "/v2/pet", "addPet", requestType = Some("Pet"))
     val detelePet = Call(Method.DELETE, "/v2/pet/:petId", "deletePet", arguments = Seq(CallArgument("petId", "long")))
