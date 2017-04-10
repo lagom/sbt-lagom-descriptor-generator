@@ -1,0 +1,17 @@
+language: scala
+sudo: false
+jdk:
+  - oraclejdk8
+
+script: sbt test
+before_install:
+    # See https://github.com/travis-ci/travis-ci/issues/4629#issuecomment-239493916
+    - rm ~/.m2/settings.xml
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt/boot/scala*
+    - $HOME/.m2/repository
+before_cache:
+  # Delete all ivydata files since ivy touches them on each build
+  - find $HOME/.ivy2/cache -name "ivydata-*.properties" | xargs rm
