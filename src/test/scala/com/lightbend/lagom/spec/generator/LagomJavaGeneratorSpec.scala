@@ -1,4 +1,4 @@
-package com.lightbend.lagom.generator
+package com.lightbend.lagom.spec.generator
 
 import org.scalatest.{ FlatSpec, Matchers }
 
