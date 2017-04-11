@@ -5,7 +5,7 @@ import java.io.InputStream
 import com.lightbend.lagom.spec.ResourceUtils
 import com.lightbend.lagom.spec.generator.{ Call, CallArgument, Method, Service }
 import io.swagger.models.parameters.Parameter
-import io.swagger.models.{ Operation, Path, Swagger }
+import io.swagger.models.{ HttpMethod, Operation, Path, Swagger }
 import io.swagger.parser.SwaggerParser
 
 import scala.collection.{ immutable, mutable }
@@ -67,28 +67,36 @@ class OpenApiV2Parser(packageName: String) extends SpecParser[Swagger] {
 
   def convertCalls(swagger: Swagger): Seq[Call] = {
     val basePath = swagger.getBasePath
-    swagger.getPaths.asScala.toIndexedSeq.flatMap {
-      case (uriPath, swaggerPath) => {
-        // This is awful. There's no way to iterate over the List[Operations] maintaining the Method
-        Seq(
-          asCall(swaggerPath, swaggerPath.getGet, Method.GET, basePath, uriPath),
-          asCall(swaggerPath, swaggerPath.getPut, Method.PUT, basePath, uriPath),
-          asCall(swaggerPath, swaggerPath.getPost, Method.POST, basePath, uriPath),
-          asCall(swaggerPath, swaggerPath.getDelete, Method.DELETE, basePath, uriPath),
-          asCall(swaggerPath, swaggerPath.getHead, Method.HEAD, basePath, uriPath),
-          asCall(swaggerPath, swaggerPath.getOptions, Method.OPTIONS, basePath, uriPath),
-          asCall(swaggerPath, swaggerPath.getPatch, Method.PATCH, basePath, uriPath)
-        ).flatten
-      }
-    }.sortBy(_.name)
+    (for {
+      (uriPath, swaggerPath) <- swagger.getPaths.asScala.toSeq
+      (method, operation) <- swaggerPath.getOperationMap.asScala.toSeq
+    } yield {
+      asCall(swaggerPath, operation, method, basePath, uriPath)
+    }).sortBy(_.name)
+  }
+
+  private def asCall(swaggerPath: Path, operation: Operation, swaggerMethod: HttpMethod, basePath: String, uriPath: String): Call = {
+
+    val path = convertPath(swaggerPath, operation, basePath, uriPath)
+    val method = swaggerMethod match {
+      case HttpMethod.GET     => Method.GET
+      case HttpMethod.PUT     => Method.PUT
+      case HttpMethod.POST    => Method.POST
+      case HttpMethod.DELETE  => Method.DELETE
+      case HttpMethod.OPTIONS => Method.OPTIONS
+      case HttpMethod.HEAD    => Method.HEAD
+      case HttpMethod.PATCH   => Method.PATCH
+    }
+    // TODO: normalize operationId name to a valid java/scala method name.
+    Call(method, path, operation.getOperationId)
   }
 
   /**
    * @param swaggerPath [[io.swagger.models.Path]] object representing a Swagger's Path (operations,
    *                    description, parameters...). The naming is horrible :-( .
-   * @param operation [[io.swagger.models.Operation]] object representing a Swagger's Operation.
-   * @param basePath a String with the prefix of the URI path applicable globally to all uriPath's
-   * @param uriPath a String with a relative path of a URI.
+   * @param operation   [[io.swagger.models.Operation]] object representing a Swagger's Operation.
+   * @param basePath    a String with the prefix of the URI path applicable globally to all uriPath's
+   * @param uriPath     a String with a relative path of a URI.
    * @return
    */
   private def convertPath(swaggerPath: Path, operation: Operation, basePath: String, uriPath: String): String = {
@@ -105,13 +113,6 @@ class OpenApiV2Parser(packageName: String) extends SpecParser[Swagger] {
 
     val queryString = if (pathParams.isEmpty) "" else pathParams.map(_.getName).sorted.mkString("?", "&", "")
     s"$completePath$queryString"
-  }
-
-  private def asCall(swaggerPath: Path, nullable: Operation, method: Method.Method, basePath: String, uriPath: String): Option[Call] = {
-    Option(nullable).map { operation =>
-      // TODO: normalize operationId.
-      Call(method, convertPath(swaggerPath, operation, basePath, uriPath), operation.getOperationId)
-    }
   }
 
 }
