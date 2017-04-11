@@ -4,11 +4,10 @@ import java.io.InputStream
 
 import com.lightbend.lagom.spec.ResourceUtils
 import com.lightbend.lagom.spec.generator.{ Call, CallArgument, Method, Service }
-import io.swagger.models.parameters.Parameter
-import io.swagger.models.{ HttpMethod, Operation, Path, Swagger }
+import io.swagger.models.parameters._
+import io.swagger.models._
+import io.swagger.models.properties._
 import io.swagger.parser.SwaggerParser
-
-import scala.collection.{ immutable, mutable }
 
 trait SpecParser[T] {
   val parse: (InputStream) => T
@@ -76,6 +75,7 @@ class OpenApiV2Parser(packageName: String) extends SpecParser[Swagger] {
   }
 
   private def asCall(swaggerPath: Path, operation: Operation, swaggerMethod: HttpMethod, basePath: String, uriPath: String): Call = {
+    val callName = operation.getOperationId
 
     val path = convertPath(swaggerPath, operation, basePath, uriPath)
     val method = swaggerMethod match {
@@ -87,8 +87,94 @@ class OpenApiV2Parser(packageName: String) extends SpecParser[Swagger] {
       case HttpMethod.HEAD    => Method.HEAD
       case HttpMethod.PATCH   => Method.PATCH
     }
+
+    // TODO: support all kinds of models
+    val requestType: Option[String] =
+      bodyParams(operation)
+        .map {
+          case bodyParam: BodyParameter =>
+            bodyParam.getSchema match {
+              case model: RefModel      => model.getSimpleRef
+              case model: ArrayModel    => ???
+              case model: ModelImpl     => ???
+              case model: ComposedModel => ???
+            }
+          case refParam: RefParameter => ???
+        }
+        .headOption
+
+    val responseType: Option[String] =
+      operation.getResponses.asScala.toSeq
+        .filter { case (status, _) => status.toInt >= 200 && status.toInt < 300 }
+        .map { case (_, response) => response }
+        .headOption
+        .map { resp =>
+          propertyToType(resp.getSchema)
+        }
+
+    val arguments = (pathParams(operation) ++ queryParams(operation)).map { param =>
+      CallArgument(param.getName, paramTypeDiscovery(param.asInstanceOf[AbstractSerializableParameter[_]]))
+    }
+
     // TODO: normalize operationId name to a valid java/scala method name.
-    Call(method, path, operation.getOperationId)
+    Call(method, path, callName, requestType, responseType, arguments)
+  }
+
+  /**
+   * Given a Parameter will generate a String with the Type info.
+   */
+  private def paramTypeDiscovery(param: AbstractSerializableParameter[_]): String = {
+    val (paramType, paramFormat) = (param.getType, param.getFormat) // p.getCollectionFormat
+
+    if (paramType == "array") {
+      s"org.pcollections.PSequence<${propertyToType(param.getItems)}>"
+    } else {
+      dataTypeConversion(paramType, paramFormat)
+    }
+  }
+
+  // See https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#data-types
+  private def dataTypeConversion(`type`: String, format: String): String = {
+    // TODO: support other formats (email, uuid,... ???)
+    (`type`, format) match {
+      case ("integer", "int32")    => "int"
+      case ("integer", "int64")    => "long"
+      case ("number", "float")     => "float"
+      case ("number", "double")    => "double"
+      case ("string", _)           => "String"
+      case ("string", "byte")      => ??? // base64 encoded characters
+      case ("string", "binary")    => ??? // any sequence of octets
+      case ("boolean", _)          => "boolean"
+      case ("string", "date")      => ??? // As defined by full-date - RFC3339
+      case ("string", "date-time") => ??? // As defined by date-time - RFC3339
+      case ("string", "password")  => ??? // Used to hint UIs the input needs to be obscured
+    }
+  }
+
+  def propertyToType: PartialFunction[Property, String] = {
+    // TODO: don't use hardcoded collection type.
+    // TODO: support other formats (email, uuid,... ???)
+    case arr: ArrayProperty  => s"org.pcollections.PSequence<${propertyToType(arr.getItems)}>"
+    case ref: RefProperty    => ref.getSimpleRef
+
+    case email: EmailProperty=> ??? // it's a subclass of StringPropertye, must match before StringProperty
+    case str: StringProperty => dataTypeConversion(str.getType, str.getFormat)
+    case binary: BinaryProperty=> ???
+    case byteArr: ByteArrayProperty=> ???
+
+    case date: DateProperty=> ???
+    case dateTime: DateTimeProperty => ???
+    case uuid: UUIDProperty => ???
+    case obj: ObjectProperty => ???
+
+    case boolean: BooleanProperty => ???
+    case integer: IntegerProperty=> ???
+    case long: LongProperty=> ???
+    case float: FloatProperty=> ???
+    case double:DoubleProperty=> ???
+
+    case file:FileProperty=> ???
+    case pwd:PasswordProperty=> ???
   }
 
   /**
@@ -103,16 +189,24 @@ class OpenApiV2Parser(packageName: String) extends SpecParser[Swagger] {
 
     val completePath = (basePath + uriPath).replaceAll("\\{([^}]*)\\}", ":$1")
 
-    // TODO: test this overriding logic
-    // reads all params of type "in: 'query'" and builds a map where the key is tha param name. Then repeats the
-    // process using the params of type "in: 'query'" of the Operation. The second map will override values from the
-    // first map so we have inheritance and overriding.
-    val pathParams: Seq[Parameter] =
-      (Option(swaggerPath.getParameters).getOrElse(java.util.Arrays.asList[Parameter]()).asScala.filter(_.getIn == "query").groupBy(_.getName) ++
-        Option(operation.getParameters).getOrElse(java.util.Arrays.asList[Parameter]()).asScala.filter(_.getIn == "query").groupBy(_.getName)).values.flatten.toSeq
-
-    val queryString = if (pathParams.isEmpty) "" else pathParams.map(_.getName).sorted.mkString("?", "&", "")
+    val params = queryParams(operation)
+    val queryString = if (params.isEmpty) "" else params.map(_.getName).sorted.mkString("?", "&", "")
     s"$completePath$queryString"
+  }
+
+  val bodyParams = params("body") _
+  val pathParams = params("path") _
+  val queryParams = params("query") _
+
+  /**
+   * Given a Swagger Operation and a Swagger Parameter Type ('query', 'body',...) returns a collection of Parameters
+   * that fulfill the criteria.
+   */
+  private def params(`type`: String)(operation: Operation) = {
+    Option(operation.getParameters)
+      .getOrElse(java.util.Arrays.asList[Parameter]())
+      .asScala
+      .filter(_.getIn == `type`)
   }
 
 }
