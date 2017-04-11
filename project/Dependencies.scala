@@ -12,7 +12,7 @@ object Version {
 }
 
 object Library {
-  val scalaTest              = "org.scalatest"   %% "scalatest"      % Version.scalaTest % "test"
+  val scalaTest              = "org.scalatest"   %% "scalatest"      % Version.scalaTest
   val swaggerParser          = "io.swagger"      % "swagger-parser"  % Version.swaggerParser
 
 }

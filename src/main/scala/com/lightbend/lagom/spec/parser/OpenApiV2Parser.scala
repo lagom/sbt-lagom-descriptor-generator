@@ -154,27 +154,27 @@ class OpenApiV2Parser(packageName: String) extends SpecParser[Swagger] {
   def propertyToType: PartialFunction[Property, String] = {
     // TODO: don't use hardcoded collection type.
     // TODO: support other formats (email, uuid,... ???)
-    case arr: ArrayProperty  => s"org.pcollections.PSequence<${propertyToType(arr.getItems)}>"
-    case ref: RefProperty    => ref.getSimpleRef
+    case arr: ArrayProperty         => s"org.pcollections.PSequence<${propertyToType(arr.getItems)}>"
+    case ref: RefProperty           => ref.getSimpleRef
 
-    case email: EmailProperty=> ??? // it's a subclass of StringPropertye, must match before StringProperty
-    case str: StringProperty => dataTypeConversion(str.getType, str.getFormat)
-    case binary: BinaryProperty=> ???
-    case byteArr: ByteArrayProperty=> ???
+    case email: EmailProperty       => ??? // it's a subclass of StringPropertye, must match before StringProperty
+    case str: StringProperty        => dataTypeConversion(str.getType, str.getFormat)
+    case binary: BinaryProperty     => ???
+    case byteArr: ByteArrayProperty => ???
 
-    case date: DateProperty=> ???
+    case date: DateProperty         => ???
     case dateTime: DateTimeProperty => ???
-    case uuid: UUIDProperty => ???
-    case obj: ObjectProperty => ???
+    case uuid: UUIDProperty         => ???
+    case obj: ObjectProperty        => ???
 
-    case boolean: BooleanProperty => ???
-    case integer: IntegerProperty=> ???
-    case long: LongProperty=> ???
-    case float: FloatProperty=> ???
-    case double:DoubleProperty=> ???
+    case boolean: BooleanProperty   => ???
+    case integer: IntegerProperty   => ???
+    case long: LongProperty         => ???
+    case float: FloatProperty       => ???
+    case double: DoubleProperty     => ???
 
-    case file:FileProperty=> ???
-    case pwd:PasswordProperty=> ???
+    case file: FileProperty         => ???
+    case pwd: PasswordProperty      => ???
   }
 
   /**
