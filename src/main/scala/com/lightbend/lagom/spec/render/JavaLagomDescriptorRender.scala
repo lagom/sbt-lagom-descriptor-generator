@@ -1,42 +1,10 @@
-package com.lightbend.lagom.spec.generator
+package com.lightbend.lagom.spec.render
 
-import java.io.InputStream
+import com.lightbend.lagom.spec.model.{ Call, CallArgument, Service }
 
-import com.lightbend.lagom.spec.parser.OpenApiV2Parser
-import io.swagger.models.Swagger
-
-sealed trait LagomDescriptorRender {
-  def packageDeclaration(service: Service): String
-
-  val lagomImports: String
-
-  def customImports(service: Service): String
-
-  def interfaceName(service: Service): String = s"${service.name.head.toUpper}${service.name.tail.map(_.toLower)}Api"
-
-  def argument(arg: CallArgument): String
-
-  def methodHandlers(calls: Seq[Call]): String
-
-  def callDescription(call: Call): String
-
-  def descriptor(service: Service): String
-
-  def serviceDefinition(service: Service): String
-
-  def render(service: Service): String =
-    s"""${packageDeclaration(service)}
-       |
-       |$lagomImports
-       |${customImports(service)}
-       |
-       |${serviceDefinition(service)}
-       |""".stripMargin.trim
-
-  protected def importWriter(fqcns: Seq[String]): String
-
-}
-
+/**
+ *
+ */
 object JavaLagomDescriptorRender extends LagomDescriptorRender {
 
   override def packageDeclaration(service: Service): String = s"package ${service.`package`};"
@@ -64,15 +32,18 @@ object JavaLagomDescriptorRender extends LagomDescriptorRender {
     s"""                restCall(Method.${call.method.name}, "${call.path}", this::${call.name})"""
 
   override def descriptor(service: Service) = {
-    val withCalls =
+    val withCalls = {
       if (service.calls.nonEmpty)
         service.calls
           .map(callDescription)
           .mkString(".withCalls(\n", ",\n", "\n        )")
       else
         ""
+    }
 
-    s"""named("${service.name}")$withCalls;"""
+    val withAutoAcl = if (service.autoAcl) ".withAutoAcl(true)" else ""
+
+    s"""named("${service.name}")$withCalls$withAutoAcl;"""
   }
 
   private def tabs(count: Int)(input: String): String = " " * count + input
@@ -93,17 +64,3 @@ object JavaLagomDescriptorRender extends LagomDescriptorRender {
   }
 
 }
-
-object LagomGenerator {
-
-  def generateFor(inputStream: InputStream): String = {
-
-    val openApiV2 = new OpenApiV2Parser("com.example")
-    val service = openApiV2.read(inputStream)
-
-    JavaLagomDescriptorRender.render(service)
-
-  }
-
-}
-

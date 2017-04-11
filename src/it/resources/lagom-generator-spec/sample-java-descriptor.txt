@@ -25,6 +25,6 @@ public interface PetApi extends Service {
                 restCall(Method.GET, "/v2/pet/:petId", this::getPetById),
                 restCall(Method.PUT, "/v2/pet", this::updatePet),
                 restCall(Method.POST, "/v2/pet/:petId", this::updatePetWithForm)
-        );
+        ).withAutoAcl(true);
     }
 }

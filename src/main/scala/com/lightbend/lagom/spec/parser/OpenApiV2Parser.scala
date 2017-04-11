@@ -2,17 +2,17 @@ package com.lightbend.lagom.spec.parser
 
 import java.io.InputStream
 
-import com.lightbend.lagom.spec.ResourceUtils
-import com.lightbend.lagom.spec.generator.{ Call, CallArgument, Method, Service }
-import io.swagger.models.parameters._
+import com.lightbend.lagom.spec.model.{ Call, CallArgument, Method, Service }
+import com.lightbend.lagom.spec.{ LagomGenerator, ResourceUtils }
 import io.swagger.models._
+import io.swagger.models.parameters._
 import io.swagger.models.properties._
 import io.swagger.parser.SwaggerParser
 
 trait SpecParser[T] {
-  val parse: (InputStream) => T
+  val parse: LagomGenerator[T]#Parse
 
-  val convert: (T) => Service
+  val convert: LagomGenerator[T]#Convert
 
   /**
    * Convenience method to [[parse]] and then [[convert]] in a single step.
@@ -22,7 +22,6 @@ trait SpecParser[T] {
   }
 }
 
-// TODO: rename to SwaggerV2Parser. Json or YAML should be processedindistinctly with this parser.
 class OpenApiV2Parser(packageName: String) extends SpecParser[Swagger] {
 
   override val parse: (InputStream) => Swagger = { inputStream =>

@@ -1,7 +1,7 @@
 package com.lightbend.lagom.spec.parser
 
 import com.lightbend.lagom.spec.ResourceUtils.resource
-import com.lightbend.lagom.spec.generator.{ Call, CallArgument }
+import com.lightbend.lagom.spec.model.CallArgument
 import org.scalatest.{ FlatSpec, Matchers }
 
 class OpenApiV2ParserSpec extends FlatSpec with Matchers {

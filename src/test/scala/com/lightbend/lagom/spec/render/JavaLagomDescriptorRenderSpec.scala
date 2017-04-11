@@ -1,5 +1,6 @@
-package com.lightbend.lagom.spec.generator
+package com.lightbend.lagom.spec.render
 
+import com.lightbend.lagom.spec.model.{ Call, CallArgument, Method, Service }
 import org.scalatest.{ FlatSpec, Matchers }
 
 /**
