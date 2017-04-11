@@ -25,6 +25,7 @@ unmanagedSourceDirectories in Test := List((scalaSource in Test).value)
 
 // Library dependencies
 libraryDependencies ++= List(
+  Library.swaggerParser,
   Library.scalaTest
 )
 

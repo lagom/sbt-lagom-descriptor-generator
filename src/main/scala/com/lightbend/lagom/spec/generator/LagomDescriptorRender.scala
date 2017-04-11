@@ -1,8 +1,11 @@
-package com.lightbend.lagom.generator
+package com.lightbend.lagom.spec.generator
 
 import java.io.InputStream
 
-sealed trait LagomGenerator {
+import com.lightbend.lagom.spec.parser.OpenApiV2Parser
+import io.swagger.models.Swagger
+
+sealed trait LagomDescriptorRender {
   def packageDeclaration(service: Service): String
 
   val lagomImports: String
@@ -21,7 +24,7 @@ sealed trait LagomGenerator {
 
   def serviceDefinition(service: Service): String
 
-  def generate(service: Service): String =
+  def render(service: Service): String =
     s"""${packageDeclaration(service)}
        |
        |$lagomImports
@@ -34,7 +37,7 @@ sealed trait LagomGenerator {
 
 }
 
-object LagomJavaGenerator extends LagomGenerator {
+object JavaLagomDescriptorRender extends LagomDescriptorRender {
 
   override def packageDeclaration(service: Service): String = s"package ${service.`package`};"
 
@@ -95,21 +98,10 @@ object LagomGenerator {
 
   def generateFor(inputStream: InputStream): String = {
 
-    // TODO: read swagger.json from inputStream into an instance of Service --> remove the following hardcoded data.
+    val openApiV2 = new OpenApiV2Parser("com.example")
+    val service = openApiV2.read(inputStream)
 
-    val addPetCall = Call(Method.POST, "/v2/pet", "addPet", requestType = Some("Pet"))
-    val detelePet = Call(Method.DELETE, "/v2/pet/:petId", "deletePet", arguments = Seq(CallArgument("petId", "long")))
-    val findPetsByStatus = Call(Method.GET, "/v2/pet/findByStatus?status", "findPetsByStatus", responseType = Some("org.pcollections.PSequence<Pet>"), arguments = Seq(CallArgument("status", "org.pcollections.PSequence<String>")))
-    val findPetsByTags = Call(Method.GET, "/v2/pet/findByTags?tags", "findPetsByTags", responseType = Some("org.pcollections.PSequence<Pet>"), arguments = Seq(CallArgument("tags", "org.pcollections.PSequence<String>")))
-    val getPetById = Call(Method.GET, "/v2/pet/:petId", "getPetById", responseType = Some("Pet"), arguments = Seq(CallArgument("petId", "long")))
-    val updatePet = Call(Method.PUT, "/v2/pet", "updatePet", requestType = Some("Pet"))
-    val updatePetWithFor = Call(Method.POST, "/v2/pet/:petId", "updatePetWithForm", arguments = Seq(CallArgument("petId", "long")))
-
-    val service = Service("com.example.pet.api", "pet",
-      Seq("Pet", "ModelApiResponse"),
-      Seq(addPetCall, detelePet, findPetsByStatus, findPetsByTags, getPetById, updatePet, updatePetWithFor))
-
-    LagomJavaGenerator.generate(service)
+    JavaLagomDescriptorRender.render(service)
 
   }
 
