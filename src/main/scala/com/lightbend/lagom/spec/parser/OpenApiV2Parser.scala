@@ -2,7 +2,7 @@ package com.lightbend.lagom.spec.parser
 
 import java.io.InputStream
 
-import com.lightbend.lagom.spec.model.{ Call, CallArgument, Method, Service }
+import com.lightbend.lagom.spec.model._
 import com.lightbend.lagom.spec.{ LagomGenerator, ResourceUtils }
 import io.swagger.models._
 import io.swagger.models.parameters._
@@ -30,22 +30,27 @@ class OpenApiV2Parser(packageName: String) extends SpecParser[Swagger] {
   }
 
   override val convert: (Swagger) => Service = { swagger =>
-    val addPetCall = Call(Method.POST, "/v2/pet", "addPet", requestType = Some("Pet"))
-    val detelePet = Call(Method.DELETE, "/v2/pet/:petId", "deletePet", arguments = Seq(CallArgument("petId", "long")))
-    val findPetsByStatus = Call(Method.GET, "/v2/pet/findByStatus?status", "findPetsByStatus", responseType = Some("org.pcollections.PSequence<Pet>"), arguments = Seq(CallArgument("status", "org.pcollections.PSequence<String>")))
-    val findPetsByTags = Call(Method.GET, "/v2/pet/findByTags?tags", "findPetsByTags", responseType = Some("org.pcollections.PSequence<Pet>"), arguments = Seq(CallArgument("tags", "org.pcollections.PSequence<String>")))
-    val getPetById = Call(Method.GET, "/v2/pet/:petId", "getPetById", responseType = Some("Pet"), arguments = Seq(CallArgument("petId", "long")))
-    val updatePet = Call(Method.PUT, "/v2/pet", "updatePet", requestType = Some("Pet"))
-    val updatePetWithFor = Call(Method.POST, "/v2/pet/:petId", "updatePetWithForm", arguments = Seq(CallArgument("petId", "long")))
+    val petFields = Seq(
+      ModelField("java.util.Optional<Long>", "id"),
+      ModelField("java.util.Optional<Category>", "category"),
+      ModelField("String", "name"),
+      ModelField("org.pcollections.PSequence<String>", "photoUrls"),
+      ModelField("org.pcollections.PSequence<Tag>", "tags"),
+      ModelField("java.util.Optional<StatusEnum>", "status")
+    )
+    val pet = CustomModel("Pet", petFields)
+    val modelApiResponse = CustomModel("ModelApiResponse")
+    val mockModels = Seq(pet, modelApiResponse)
 
-    val mock = Service("unused", "unused",
-      Seq("Pet", "ModelApiResponse"),
-      Seq(addPetCall, detelePet, findPetsByStatus, findPetsByTags, getPetById, updatePet, updatePetWithFor))
-
-    mock.copy(
+    Service(
       `package` = packageName,
       name = serviceName(swagger),
-      calls = convertCalls(swagger)
+      calls = convertCalls(swagger),
+      customModels = mockModels,
+      // building code from a spec usually means it's public endpoints.
+      // TODO: needs review
+      autoAcl = true
+
     )
   }
 

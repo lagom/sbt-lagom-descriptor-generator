@@ -26,10 +26,22 @@ object Method {
   case object HEAD extends Method("HEAD")
 }
 
-case class Service(
-  `package`: String,
-  name: String, // TODO: use some abstraction to represent names
-  customModels: Seq[String] = Seq.empty[String],
-  calls: Seq[Call] = Seq.empty[Call],
-  autoAcl: Boolean = true
+case class ModelField(
+  fieldType: String, // TODO: use some abstraction to represent types
+  fieldName: String
 )
+case class CustomModel(
+  className: String,
+  fields: Seq[ModelField] = Seq.empty[ModelField]
+)
+
+case class Service(
+    `package`: String,
+    name: String, // TODO: use some abstraction to represent names
+    customModels: Seq[CustomModel] = Seq.empty[CustomModel],
+    calls: Seq[Call] = Seq.empty[Call],
+    autoAcl: Boolean = true
+) {
+  val interfaceName = s"${name.head.toUpper}${name.tail.map(_.toLower)}Api"
+  val traitName = interfaceName
+}

@@ -1,4 +1,4 @@
-package com.lightbend.lagom.spec.render
+package com.lightbend.lagom.spec.render.descriptor
 
 import com.lightbend.lagom.spec.model.{ Call, CallArgument, Service }
 
@@ -15,7 +15,7 @@ object JavaLagomDescriptorRender extends LagomDescriptorRender {
     "com.lightbend.lagom.javadsl.api.transport.*"
   ))
 
-  override def customImports(service: Service): String = importWriter(service.customModels.map(name => s"${service.`package`}.$name"))
+  override def customImports(service: Service): String = importWriter(service.customModels.map(customModel => s"${service.`package`}.${customModel.className}"))
 
   override def argument(arg: CallArgument): String = s"${arg.`type`} ${arg.name}"
 

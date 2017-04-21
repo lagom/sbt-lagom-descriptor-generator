@@ -1,4 +1,4 @@
-package com.lightbend.lagom.spec.render
+package com.lightbend.lagom.spec.render.descriptor
 
 import com.lightbend.lagom.spec.LagomGeneratorTypes
 import com.lightbend.lagom.spec.model.{ Call, CallArgument, Service }
@@ -10,7 +10,7 @@ trait LagomDescriptorRender {
 
   def customImports(service: Service): String
 
-  def interfaceName(service: Service): String = s"${service.name.head.toUpper}${service.name.tail.map(_.toLower)}Api"
+  def interfaceName(service: Service): String = service.interfaceName
 
   def argument(arg: CallArgument): String
 
@@ -22,7 +22,7 @@ trait LagomDescriptorRender {
 
   def serviceDefinition(service: Service): String
 
-  final val render: LagomGeneratorTypes.Render = { service: Service =>
+  final val render: LagomGeneratorTypes.DescriptorRender = { service: Service =>
     s"""${packageDeclaration(service)}
        |
        |$lagomImports

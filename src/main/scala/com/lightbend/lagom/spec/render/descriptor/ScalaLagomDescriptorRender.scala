@@ -1,4 +1,4 @@
-package com.lightbend.lagom.spec.render
+package com.lightbend.lagom.spec.render.descriptor
 
 import com.lightbend.lagom.spec.model.{ Call, CallArgument, Service }
 

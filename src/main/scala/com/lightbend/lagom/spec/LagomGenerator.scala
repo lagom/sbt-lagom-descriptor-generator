@@ -2,10 +2,13 @@ package com.lightbend.lagom.spec
 
 import java.io.InputStream
 
-import com.lightbend.lagom.spec.model.Service
+import com.lightbend.lagom.spec.model.{ CustomModel, Service }
 
 object LagomGeneratorTypes {
-  type Output = String
+  case class GeneratedCode(filename: String, fileContents: String)
+  case class Output(descriptor: GeneratedCode, models: Map[String, GeneratedCode])
+  type ModelRender = (Service, CustomModel) => String
+  type DescriptorRender = Service => String
   type Render = Service => Output
   type Filter = Service => Service
 }

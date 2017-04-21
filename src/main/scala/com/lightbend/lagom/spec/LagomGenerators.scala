@@ -3,7 +3,7 @@ package com.lightbend.lagom.spec
 import java.io.InputStream
 
 import com.lightbend.lagom.spec.parser.OpenApiV2Parser
-import com.lightbend.lagom.spec.render.JavaLagomDescriptorRender
+import com.lightbend.lagom.spec.render.JavaLagomRender
 import io.swagger.models.Swagger
 
 object LagomGenerators {
@@ -15,7 +15,7 @@ object LagomGenerators {
       openApiV2.parse,
       openApiV2.convert,
       identity,
-      JavaLagomDescriptorRender.render
+      JavaLagomRender.render
     )
   }
 

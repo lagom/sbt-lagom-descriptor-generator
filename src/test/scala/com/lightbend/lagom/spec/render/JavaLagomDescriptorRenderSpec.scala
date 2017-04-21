@@ -1,6 +1,7 @@
 package com.lightbend.lagom.spec.render
 
-import com.lightbend.lagom.spec.model.{ Call, CallArgument, Method, Service }
+import com.lightbend.lagom.spec.model._
+import com.lightbend.lagom.spec.render.descriptor.JavaLagomDescriptorRender
 import org.scalatest.{ FlatSpec, Matchers }
 
 /**
@@ -11,7 +12,7 @@ class JavaLagomDescriptorRenderSpec extends FlatSpec with Matchers {
   behavior of "Lagom Java Generator"
 
   it should "generate a package statement" in {
-    val service = Service("com.example", "")
+    val service = Service("com.example", "name")
     JavaLagomDescriptorRender.packageDeclaration(service) should ===("package com.example;")
   }
 
@@ -26,7 +27,8 @@ class JavaLagomDescriptorRenderSpec extends FlatSpec with Matchers {
   }
 
   it should "include custom imports when there are some" in {
-    val service = Service("com.example", "", Seq("Foo", "Bar"))
+    val models = Seq("Foo", "Bar").map { str => CustomModel(str) }
+    val service = Service("com.example", "name", customModels = models)
     JavaLagomDescriptorRender.customImports(service).split("\n").toSeq should ===(
       Seq(
         "import com.example.Foo;",
