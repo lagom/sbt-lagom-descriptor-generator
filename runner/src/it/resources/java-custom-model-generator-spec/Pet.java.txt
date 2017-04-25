@@ -35,55 +35,49 @@ public final class Pet {
     //TODO: add plus() for sequences and nullable withers for optionals
 
     public Pet withId(java.util.Optional<Long> id) {
-        return new Builder(this).withId(id).build();
+        return new Pet(id, category, name, photoUrls, tags, status);
     }
 
     public Pet withCategory(java.util.Optional<Category> category) {
-        return new Builder(this).withCategory(category).build();
+        return new Pet(id, category, name, photoUrls, tags, status);
     }
 
     public Pet withName(String name) {
-        return new Builder(this).withName(name).build();
+        return new Pet(id, category, name, photoUrls, tags, status);
     }
 
     public Pet withPhotoUrls(org.pcollections.PSequence<String> photoUrls) {
-        return new Builder(this).withPhotoUrls(photoUrls).build();
+        return new Pet(id, category, name, photoUrls, tags, status);
     }
 
     public Pet withTags(org.pcollections.PSequence<Tag> tags) {
-        return new Builder(this).withTags(tags).build();
+        return new Pet(id, category, name, photoUrls, tags, status);
     }
 
     public Pet withStatus(java.util.Optional<StatusEnum> status) {
-        return new Builder(this).withStatus(status).build();
+        return new Pet(id, category, name, photoUrls, tags, status);
     }
 
-    @ApiModelProperty()
     public java.util.Optional<Long> getId() {
         return id;
     }
 
-    @ApiModelProperty()
     public java.util.Optional<Category> getCategory() {
         return category;
     }
 
-    @ApiModelProperty()
     public String getName() {
         return name;
     }
 
-    @ApiModelProperty()
     public org.pcollections.PSequence<String> getPhotoUrls() {
         return photoUrls;
     }
 
-    @ApiModelProperty()
     public org.pcollections.PSequence<Tag> getTags() {
         return tags;
     }
 
-    @ApiModelProperty()
     public java.util.Optional<StatusEnum> getStatus() {
         return status;
     }

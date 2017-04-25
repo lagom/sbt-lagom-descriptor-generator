@@ -14,7 +14,7 @@ import com.lightbend.lagom.spec.render.model.JavaModelRender
 object JavaLagomRender {
 
   val render: LagomGeneratorTypes.Render = { service =>
-    val descriptorFileName = getPath(service, s"${service.interfaceName}.java")
+    val descriptorFileName = getPath(service, s"${service.interfaceName}")
     val descriptor: String = JavaLagomDescriptorRender.render(service)
 
     val customModels = service.customModels.map { model =>

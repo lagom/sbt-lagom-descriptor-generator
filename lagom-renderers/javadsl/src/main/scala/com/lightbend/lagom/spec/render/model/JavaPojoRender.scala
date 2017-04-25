@@ -27,7 +27,7 @@ object JavaPojoRender {
   private def withers(className: String, model: CustomModel): String = {
     model.fields.map { field =>
       s"""public $className with${capitalized(field.fieldName)}(${renderType(field.fieldType)} ${field.fieldName}) {
-         |    return new Builder(this).with${capitalized(field.fieldName)}(${field.fieldName}).build();
+         |    return new $className(${model.fields.map(_.fieldName).mkString(", ")});
          |}"""
         .stripMargin
     }.map {
@@ -39,8 +39,7 @@ object JavaPojoRender {
     // TODO: add annotation params wrt required, default value, ...
     // TODO: boolean feilds should use isXXX() method names
     model.fields.map { field =>
-      s"""@ApiModelProperty()
-         |public ${renderType(field.fieldType)} get${capitalized(field.fieldName)}() {
+      s"""public ${renderType(field.fieldType)} get${capitalized(field.fieldName)}() {
          |    return ${field.fieldName};
          |}"""
         .stripMargin
@@ -66,7 +65,7 @@ object JavaPojoRender {
        |    if (o == null || getClass() != o.getClass()) {
        |        return false;
        |    }
-       |    ${model.className} pet = (${model.className}) o;
+       |    ${model.className} ${model.className.toLowerCase} = (${model.className}) o;
        |    return ${fieldEquals(varName, model)}
        |}"""
       .stripMargin

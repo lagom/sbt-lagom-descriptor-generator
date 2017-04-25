@@ -1,0 +1,10 @@
+# Structure of this test:
+# =======================
+
+# Here we test the swagger to java lagom descriptor and model generators
+
+> clean
+> compile
+> verifyDescriptor
+> verifyPojo
+> verifyEnum
