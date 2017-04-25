@@ -1,7 +1,7 @@
 package com.lightbend.lagom.spec.parser
 
 import com.lightbend.lagom.spec.ResourceUtils.resource
-import com.lightbend.lagom.spec.model.CallArgument
+import com.lightbend.lagom.spec.model._
 import org.scalatest.{ FlatSpec, Matchers }
 
 class OpenApiV2ParserSpec extends FlatSpec with Matchers {
@@ -33,7 +33,7 @@ class OpenApiV2ParserSpec extends FlatSpec with Matchers {
   }
 
   it should "parse type of request" in {
-    service.calls.find(_.name == "addPet").flatMap { _.requestType } should be(Some("Pet"))
+    service.calls.find(_.name == "addPet").flatMap { _.requestType } should be(Some(LUserDefined("Pet")))
   }
 
   it should "default type of request to None" in {
@@ -41,7 +41,7 @@ class OpenApiV2ParserSpec extends FlatSpec with Matchers {
   }
 
   it should "parse type of response" in {
-    service.calls.find(_.name == "getPetById").flatMap { _.responseType } should be(Some("Pet"))
+    service.calls.find(_.name == "getPetById").flatMap { _.responseType } should be(Some(LUserDefined("Pet")))
   }
 
   it should "default type of response to None" in {
@@ -49,12 +49,12 @@ class OpenApiV2ParserSpec extends FlatSpec with Matchers {
   }
 
   it should "parse array response types" in {
-    service.calls.find(_.name == "findPetsByTags").flatMap { _.responseType } should be(Some("org.pcollections.PSequence<Pet>"))
+    service.calls.find(_.name == "findPetsByTags").flatMap { _.responseType } should be(Some(LSequence(LUserDefined("Pet"))))
   }
 
   it should "parse call arguments name" in {
     val getPetById = service.calls.find(_.name == "getPetById").get
-    getPetById.arguments.head should be(CallArgument("petId", "long"))
+    getPetById.arguments.head should be(CallArgument("petId", LLong))
   }
 
 }

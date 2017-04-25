@@ -1,6 +1,5 @@
 package com.lightbend.lagom.spec
 
-import io.swagger.models.Swagger
 import org.scalatest.{ FlatSpec, Matchers }
 
 class LagomGeneratorSpec extends FlatSpec with Matchers {
@@ -15,9 +14,9 @@ class LagomGeneratorSpec extends FlatSpec with Matchers {
     val packageName = "com.example.pet.api"
     val inputStream = resource(s"$folder/swagger.json")
 
-    val generated: String = LagomGenerators.swaggerV2ToLagomJava(inputStream, packageName)
+    val generatedCode: String = LagomGenerators.swaggerV2ToLagomJava(inputStream, packageName).descriptor.fileContents
     val expected: String = loadContents(s"$folder/sample-java-descriptor.txt")
-    expected should be(generated)
+    expected should be(generatedCode)
 
   }
 

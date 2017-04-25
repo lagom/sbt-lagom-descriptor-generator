@@ -1,4 +1,4 @@
-package com.lightbend.lagom.spec.render
+package com.lightbend.lagom.spec.render.descriptor
 
 import com.lightbend.lagom.spec.model.{ Call, CallArgument, Service }
 
@@ -19,5 +19,5 @@ object ScalaLagomDescriptorRender extends LagomDescriptorRender {
 
   override def serviceDefinition(service: Service): String = ???
 
-  override protected def importWriter(fqcns: Seq[String]): String = ???
+  override protected def importWriter(fqcns: Set[String]): String = ???
 }

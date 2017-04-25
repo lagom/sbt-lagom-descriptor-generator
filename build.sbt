@@ -48,6 +48,7 @@ lazy val bintraySettings = Seq(
     bintrayOrganization in bintray := Some("sbt-lagom-descriptor-generator")
   )
 
+
 // not used
 lazy val scripteTestsSettings =
 // Scripted test settings

@@ -1,6 +1,7 @@
-package com.lightbend.lagom.spec.render
+package com.lightbend.lagom.spec.render.descriptor
 
 import com.lightbend.lagom.spec.model.{ Call, CallArgument, Service }
+import com.lightbend.lagom.spec.render.model.JavaTypeRenderer
 
 /**
  *
@@ -9,19 +10,21 @@ object JavaLagomDescriptorRender extends LagomDescriptorRender {
 
   override def packageDeclaration(service: Service): String = s"package ${service.`package`};"
 
-  override val lagomImports: String = importWriter(Seq(
+  override val lagomImports: String = importWriter(Set(
     "static com.lightbend.lagom.javadsl.api.Service.*",
     "com.lightbend.lagom.javadsl.api.*",
     "com.lightbend.lagom.javadsl.api.transport.*"
   ))
 
-  override def customImports(service: Service): String = importWriter(service.customModels.map(name => s"${service.`package`}.$name"))
+  import JavaTypeRenderer.renderType
 
-  override def argument(arg: CallArgument): String = s"${arg.`type`} ${arg.name}"
+  override def customImports(service: Service): String = importWriter(service.customModels.map(customModel => s"${service.`package`}.${customModel.className}"))
+
+  override def argument(arg: CallArgument): String = s"${renderType(arg.`type`)} ${arg.name}"
 
   override def methodHandlers(calls: Seq[Call]): String = calls.map { call =>
-    val req = call.requestType.getOrElse("akka.NotUsed")
-    val resp = call.responseType.getOrElse("akka.Done")
+    val req = call.requestType.map(rt => renderType(rt, preferPrimitives = false)).getOrElse("akka.NotUsed")
+    val resp = call.responseType.map(rt => renderType(rt, preferPrimitives = false)).getOrElse("akka.Done")
     val args = call.arguments.map(argument).mkString(", ")
     s"ServiceCall<$req, $resp> ${call.name}($args);"
   }
@@ -59,7 +62,7 @@ object JavaLagomDescriptorRender extends LagomDescriptorRender {
        |    }
        |}""".stripMargin.trim
 
-  override def importWriter(fqcns: Seq[String]): String = {
+  override def importWriter(fqcns: Set[String]): String = {
     fqcns.map(fqcn => s"import $fqcn;").mkString("\n")
   }
 
