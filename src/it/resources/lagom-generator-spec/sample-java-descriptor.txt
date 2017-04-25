@@ -3,10 +3,11 @@ package com.example.pet.api;
 import static com.lightbend.lagom.javadsl.api.Service.*;
 import com.lightbend.lagom.javadsl.api.*;
 import com.lightbend.lagom.javadsl.api.transport.*;
-import com.example.pet.api.Category;
-import com.example.pet.api.Tag;
 import com.example.pet.api.Pet;
 import com.example.pet.api.ApiResponse;
+import com.example.pet.api.StatusEnum;
+import com.example.pet.api.Category;
+import com.example.pet.api.Tag;
 
 public interface PetApi extends Service {
 

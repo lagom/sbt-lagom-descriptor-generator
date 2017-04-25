@@ -27,7 +27,7 @@ class JavaLagomDescriptorRenderSpec extends FlatSpec with Matchers {
   }
 
   it should "include custom imports when there are some" in {
-    val models = Seq("Foo", "Bar").map { str => CustomModel(str) }
+    val models: Set[CustomType] = Set("Foo", "Bar").map { str => CustomModel(str) }
     val service = Service("com.example", "name", customModels = models)
     JavaLagomDescriptorRender.customImports(service).split("\n").toSeq should ===(
       Seq(

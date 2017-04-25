@@ -31,15 +31,16 @@ case class ModelField(
   fieldName: String
 )
 
-case class CustomModel(
-  className: String,
-  fields: Seq[ModelField] = Seq.empty[ModelField]
-)
+sealed trait CustomType {
+  val className: String
+}
+case class CustomEnum(className: String, values: Seq[String]) extends CustomType
+case class CustomModel(className: String, fields: Seq[ModelField] = Seq.empty[ModelField]) extends CustomType
 
 case class Service(
     `package`: String,
     name: String, // TODO: use some abstraction to represent names
-    customModels: Seq[CustomModel] = Seq.empty[CustomModel],
+    customModels: Set[CustomType] = Set.empty[CustomType],
     calls: Seq[Call] = Seq.empty[Call],
     autoAcl: Boolean = true
 ) {

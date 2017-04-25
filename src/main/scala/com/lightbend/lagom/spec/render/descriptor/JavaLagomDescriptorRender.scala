@@ -10,7 +10,7 @@ object JavaLagomDescriptorRender extends LagomDescriptorRender {
 
   override def packageDeclaration(service: Service): String = s"package ${service.`package`};"
 
-  override val lagomImports: String = importWriter(Seq(
+  override val lagomImports: String = importWriter(Set(
     "static com.lightbend.lagom.javadsl.api.Service.*",
     "com.lightbend.lagom.javadsl.api.*",
     "com.lightbend.lagom.javadsl.api.transport.*"
@@ -62,7 +62,7 @@ object JavaLagomDescriptorRender extends LagomDescriptorRender {
        |    }
        |}""".stripMargin.trim
 
-  override def importWriter(fqcns: Seq[String]): String = {
+  override def importWriter(fqcns: Set[String]): String = {
     fqcns.map(fqcn => s"import $fqcn;").mkString("\n")
   }
 

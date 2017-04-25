@@ -1,0 +1,35 @@
+package com.example.pet.api;
+
+import com.fasterxml.jackson.annotation.*;
+
+public enum StatusEnum {
+    AVAILABLE("available"),
+    PENDING("pending"),
+    SOLD("sold");
+
+    private final String value;
+
+    StatusEnum(String value) {
+      this.value = value;
+    }
+
+    @com.fasterxml.jackson.annotation.JsonValue
+    public String getValue() {
+      return value;
+    }
+
+    @Override
+    public String toString() {
+      return String.valueOf(value);
+    }
+
+    @com.fasterxml.jackson.annotation.JsonCreator
+    public static StatusEnum fromValue(String text) {
+      for (StatusEnum b : StatusEnum.values()) {
+        if (String.valueOf(b.value).equals(text)) {
+          return b;
+        }
+      }
+      return null;
+    }
+  }

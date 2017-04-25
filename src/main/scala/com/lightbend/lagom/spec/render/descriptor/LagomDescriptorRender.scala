@@ -32,7 +32,7 @@ trait LagomDescriptorRender {
        |""".stripMargin.trim
   }
 
-  protected def importWriter(fqcns: Seq[String]): String
+  protected def importWriter(fqcns: Set[String]): String
 
 }
 

@@ -26,11 +26,11 @@ trait SpecParser[T] {
 
 object OpenApiV2ModelParser {
 
-  def parseModel(swagger: Swagger): Seq[CustomModel] = {
+  def parseModel(swagger: Swagger): Set[CustomType] = {
 
-    swagger.getDefinitions.asScala.map {
+    swagger.getDefinitions.asScala.flatMap {
       case (name, sModel) =>
-        val fields = sModel.getProperties.asScala.map {
+        val fields: Seq[ModelField] = sModel.getProperties.asScala.map {
           case (fieldName, sProperty) =>
             val actualType = propertyToType(fieldName, sProperty)
             // A field must be optional if it's not a Collection and is not listed in the model as required
@@ -41,9 +41,20 @@ object OpenApiV2ModelParser {
             }
             ModelField(t2, fieldName)
         }.toList
-        CustomModel(name, fields)
-    }.toList
+        CustomModel(name, fields) +: produceEnums(fields)
+    }.toSet
   }
+
+  private def produceEnums(fields: Seq[ModelField]): Seq[CustomEnum] =
+    fields.flatMap {
+      case ModelField(LOptional(t), _) => Seq(t)
+      case ModelField(LSequence(t), _) => Seq(t)
+      case ModelField(LSet(t), _)      => Seq(t)
+      case ModelField(LMap(t, q), _)   => Seq(t, q)
+      case ModelField(t, _)            => Seq(t)
+    }.collect {
+      case LEnum(name, values) => CustomEnum(name, values)
+    }
 
   def modelToType(swaggerModel: Model): Type = {
     swaggerModel match {
@@ -67,8 +78,8 @@ object OpenApiV2ModelParser {
         val enumName = s"${camel}Enum"
         LEnum(enumName, str.getEnum.asScala)
       }
+      case email: EmailProperty       => ???
       case str: StringProperty        => dataTypeConversion(preferredName, str.getType, str.getFormat)
-      case email: EmailProperty       => ??? // it's a subclass of StringProperty, must match before StringProperty
       case binary: BinaryProperty     => ???
       case byteArr: ByteArrayProperty => ???
       case uuid: UUIDProperty         => ???
