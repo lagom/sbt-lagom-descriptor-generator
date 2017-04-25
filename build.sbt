@@ -7,9 +7,19 @@ import scala.collection.immutable
 import scalariform.formatter.preferences._
 
 
+lazy val `root` = (project in file("."))
+  .settings(name := "sbt-lagom-descriptor-generator")
+  .aggregate(
+    `generator-api`,
+    `openapi-parser`,
+    `lagom-renderer-javadsl`,
+    `lagom-renderer-scaladsl`,
+    `runner`,
+    `sbt-plugin`
+  )
+  .settings(commonSettings: _*)
+
 lazy val commonSettings = Seq(
-  sbtPlugin := true,
-  name := "sbt-lagom-descriptor-generator",
   organization := "com.lightbend.lagom.generator",
   // Scala settings
   scalaVersion := Version.scala,
@@ -48,7 +58,6 @@ lazy val bintraySettings = Seq(
     bintrayOrganization in bintray := Some("sbt-lagom-descriptor-generator")
   )
 
-
 // not used
 lazy val scripteTestsSettings =
 // Scripted test settings
@@ -60,20 +69,69 @@ lazy val scripteTestsSettings =
     )
 
 
-lazy val `sbt-lagom-descriptor-generator` = project
-  .in(file("."))
+lazy val `sbt-plugin` = project
+  .in(file("sbt-plugin"))
+  .settings(
+    sbtPlugin := true,
+    commonSettings,
+    commonScalariformSettings
+  ).dependsOn(`runner`)
+
+lazy val `runner` = project
+  .in(file("runner"))
   .configs(IntegrationTest)
   .settings(
     commonSettings,
     commonScalariformSettings,
     Defaults.itSettings,
-
-    // Library dependencies
     libraryDependencies ++= List(
-      Library.swaggerParser,
       Library.scalaTest % "test,it"
     )
   )
+  .dependsOn(
+    `openapi-parser`,
+    `lagom-renderer-javadsl`,
+    `lagom-renderer-scaladsl`
+  )
 
 
+lazy val `lagom-renderer-javadsl` = project
+  .in(file("lagom-renderers") / "javadsl")
+  .settings(
+    commonSettings,
+    commonScalariformSettings,
+    libraryDependencies ++= List(
+      Library.scalaTest % "test"
+    )
+  ).dependsOn(`generator-api`)
 
+lazy val `lagom-renderer-scaladsl` = project
+  .in(file("lagom-renderers") / "scaladsl")
+  .settings(
+    commonSettings,
+    commonScalariformSettings,
+    libraryDependencies ++= List(
+      Library.scalaTest % "test"
+    )
+  ).dependsOn(`generator-api`)
+
+lazy val `openapi-parser` = project
+  .in(file("spec-parsers") / "openapi")
+  .settings(
+    commonSettings,
+    commonScalariformSettings,
+    libraryDependencies ++= List(
+      Library.swaggerParser,
+      Library.scalaTest % "test"
+    )
+  ).dependsOn(`generator-api`)
+
+lazy val `generator-api` = project
+  .in(file("generator-api"))
+  .settings(
+    commonSettings,
+    commonScalariformSettings,
+    libraryDependencies ++= List(
+      Library.scalaTest % "test"
+    )
+  )

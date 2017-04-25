@@ -1,0 +1,133 @@
+package com.example.pet.api;
+
+import com.fasterxml.jackson.annotation.*;
+
+@javax.annotation.Generated(value = "class com.lightbend.lagom.spec.LagomGenerators")
+public final class Pet {
+    @JsonProperty("id")
+    private final java.util.Optional<Long> id;
+
+    @JsonProperty("category")
+    private final java.util.Optional<Category> category;
+
+    @JsonProperty("name")
+    private final String name;
+
+    @JsonProperty("photoUrls")
+    private final org.pcollections.PSequence<String> photoUrls;
+
+    @JsonProperty("tags")
+    private final org.pcollections.PSequence<Tag> tags;
+
+    @JsonProperty("status")
+    private final java.util.Optional<StatusEnum> status;
+
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    public Pet(java.util.Optional<Long> id, java.util.Optional<Category> category, String name, org.pcollections.PSequence<String> photoUrls, org.pcollections.PSequence<Tag> tags, java.util.Optional<StatusEnum> status) {
+        this.id = id;
+        this.category = category;
+        this.name = name;
+        this.photoUrls = photoUrls;
+        this.tags = tags;
+        this.status = status;
+    }
+
+    //TODO: add plus() for sequences and nullable withers for optionals
+
+    public Pet withId(java.util.Optional<Long> id) {
+        return new Builder(this).withId(id).build();
+    }
+
+    public Pet withCategory(java.util.Optional<Category> category) {
+        return new Builder(this).withCategory(category).build();
+    }
+
+    public Pet withName(String name) {
+        return new Builder(this).withName(name).build();
+    }
+
+    public Pet withPhotoUrls(org.pcollections.PSequence<String> photoUrls) {
+        return new Builder(this).withPhotoUrls(photoUrls).build();
+    }
+
+    public Pet withTags(org.pcollections.PSequence<Tag> tags) {
+        return new Builder(this).withTags(tags).build();
+    }
+
+    public Pet withStatus(java.util.Optional<StatusEnum> status) {
+        return new Builder(this).withStatus(status).build();
+    }
+
+    @ApiModelProperty()
+    public java.util.Optional<Long> getId() {
+        return id;
+    }
+
+    @ApiModelProperty()
+    public java.util.Optional<Category> getCategory() {
+        return category;
+    }
+
+    @ApiModelProperty()
+    public String getName() {
+        return name;
+    }
+
+    @ApiModelProperty()
+    public org.pcollections.PSequence<String> getPhotoUrls() {
+        return photoUrls;
+    }
+
+    @ApiModelProperty()
+    public org.pcollections.PSequence<Tag> getTags() {
+        return tags;
+    }
+
+    @ApiModelProperty()
+    public java.util.Optional<StatusEnum> getStatus() {
+        return status;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Pet pet = (Pet) o;
+        return java.util.Objects.equals(this.id, pet.id) &&
+                java.util.Objects.equals(this.category, pet.category) &&
+                java.util.Objects.equals(this.name, pet.name) &&
+                java.util.Objects.equals(this.photoUrls, pet.photoUrls) &&
+                java.util.Objects.equals(this.tags, pet.tags) &&
+                java.util.Objects.equals(this.status, pet.status);
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(id, category, name, photoUrls, tags, status);
+    }
+
+    @Override
+    public String toString() {
+        java.util.StringJoiner sj = new java.util.StringJoiner(",", "(", ")");
+        sj.add(toString(this.id));
+        sj.add(toString(this.category));
+        sj.add(toString(this.name));
+        sj.add(toString(this.photoUrls));
+        sj.add(toString(this.tags));
+        sj.add(toString(this.status));
+        return sj.toString();
+    }
+
+    private String toString(Object o) {
+        if (o == null) {
+            return "null";
+        } else {
+            return o.toString();
+        }
+    }
+
+}
