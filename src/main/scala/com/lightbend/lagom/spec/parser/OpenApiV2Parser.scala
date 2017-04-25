@@ -9,6 +9,8 @@ import io.swagger.models.parameters._
 import io.swagger.models.properties._
 import io.swagger.parser.SwaggerParser
 
+import scala.collection.JavaConverters._
+
 trait SpecParser[T] {
   val parse: LagomGenerator[T]#Parse
 
@@ -22,6 +24,88 @@ trait SpecParser[T] {
   }
 }
 
+object OpenApiV2ModelParser {
+
+  def parseModel(swagger: Swagger): Seq[CustomModel] = {
+
+    swagger.getDefinitions.asScala.map {
+      case (name, sModel) =>
+        val fields = sModel.getProperties.asScala.map {
+          case (fieldName, sProperty) =>
+            val actualType = propertyToType(fieldName, sProperty)
+            // A field must be optional if it's not a Collection and is not listed in the model as required
+            val t2 = (sModel, actualType) match {
+              case (_, LSequence(_)) | (_, LSet(_))                                                    => actualType
+              case (mi: ModelImpl, _) if mi.getRequired != null && !mi.getRequired.contains(fieldName) => LOptional(actualType)
+              case _                                                                                   => actualType
+            }
+            ModelField(t2, fieldName)
+        }.toList
+        CustomModel(name, fields)
+    }.toList
+  }
+
+  def modelToType(swaggerModel: Model): Type = {
+    swaggerModel match {
+      case model: RefModel      => LUserDefined(model.getSimpleRef)
+      case model: ArrayModel    => ??? // inline models not supported
+      case model: ModelImpl     => ??? // inline models not supported
+      case model: ComposedModel => ??? // inline models not supported
+    }
+  }
+
+  def propertyToType(preferredName: String, swaggerProperty: Property): Type =
+    swaggerProperty match {
+      // TODO: don't use hardcoded collection type.
+      // TODO: support other formats (email, uuid,... ???)
+      case arr: ArrayProperty => LSequence(propertyToType(preferredName, arr.getItems))
+      case ref: RefProperty   => LUserDefined(ref.getSimpleRef)
+
+      case str: StringProperty if str.getEnum != null => {
+        // TODO: use naming features to remove '-', add camelcasing, etc...
+        val camel = s"${preferredName.head.toUpper}${preferredName.tail}"
+        val enumName = s"${camel}Enum"
+        LEnum(enumName, str.getEnum.asScala)
+      }
+      case str: StringProperty        => dataTypeConversion(preferredName, str.getType, str.getFormat)
+      case email: EmailProperty       => ??? // it's a subclass of StringProperty, must match before StringProperty
+      case binary: BinaryProperty     => ???
+      case byteArr: ByteArrayProperty => ???
+      case uuid: UUIDProperty         => ???
+      case obj: ObjectProperty        => ???
+      case pwd: PasswordProperty      => ???
+
+      case file: FileProperty         => ???
+
+      case date: DateProperty         => LDate
+      case dateTime: DateTimeProperty => LDateTime
+
+      case boolean: BooleanProperty   => LBoolean
+      case integer: IntegerProperty   => LInt
+      case long: LongProperty         => LLong
+      case float: FloatProperty       => LFloat
+      case double: DoubleProperty     => LDouble
+    }
+
+  // See https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#data-types
+  def dataTypeConversion(preferredName: String, `type`: String, format: String): Type =
+    // TODO: support other formats (email, uuid,... ???)
+    (`type`, format) match {
+      case ("integer", "int32")    => LInt
+      case ("integer", "int64")    => LLong
+      case ("number", "float")     => LFloat
+      case ("number", "double")    => LDouble
+      case ("boolean", _)          => LBoolean
+      case ("string", "byte")      => ??? // base64 encoded characters
+      case ("string", "binary")    => ??? // any sequence of octets
+      case ("string", "date")      => LDate // As defined by full-date - RFC3339
+      case ("string", "date-time") => LDateTime // As defined by date-time - RFC3339
+      case ("string", "password")  => ??? // Used to hint UIs the input needs to be obscured
+      case ("string", _)           => LString
+    }
+
+}
+
 class OpenApiV2Parser(packageName: String) extends SpecParser[Swagger] {
 
   override val parse: (InputStream) => Swagger = { inputStream =>
@@ -30,31 +114,16 @@ class OpenApiV2Parser(packageName: String) extends SpecParser[Swagger] {
   }
 
   override val convert: (Swagger) => Service = { swagger =>
-    val petFields = Seq(
-      ModelField("java.util.Optional<Long>", "id"),
-      ModelField("java.util.Optional<Category>", "category"),
-      ModelField("String", "name"),
-      ModelField("org.pcollections.PSequence<String>", "photoUrls"),
-      ModelField("org.pcollections.PSequence<Tag>", "tags"),
-      ModelField("java.util.Optional<StatusEnum>", "status")
-    )
-    val pet = CustomModel("Pet", petFields)
-    val modelApiResponse = CustomModel("ModelApiResponse")
-    val mockModels = Seq(pet, modelApiResponse)
-
     Service(
       `package` = packageName,
       name = serviceName(swagger),
       calls = convertCalls(swagger),
-      customModels = mockModels,
+      customModels = OpenApiV2ModelParser.parseModel(swagger),
       // building code from a spec usually means it's public endpoints.
       // TODO: needs review
       autoAcl = true
-
     )
   }
-
-  import scala.collection.JavaConverters._
 
   def serviceName(swagger: Swagger): String = {
     val tags: Iterable[String] = for {
@@ -93,31 +162,30 @@ class OpenApiV2Parser(packageName: String) extends SpecParser[Swagger] {
     }
 
     // TODO: support all kinds of models
-    val requestType: Option[String] =
+    val requestType: Option[Type] =
       bodyParams(operation)
         .map {
-          case bodyParam: BodyParameter =>
-            bodyParam.getSchema match {
-              case model: RefModel      => model.getSimpleRef
-              case model: ArrayModel    => ???
-              case model: ModelImpl     => ???
-              case model: ComposedModel => ???
-            }
-          case refParam: RefParameter => ???
+          case bodyParam: BodyParameter  => OpenApiV2ModelParser.modelToType(bodyParam.getSchema)
+          case refParam: RefParameter    => ???
+          case refParam: HeaderParameter => ???
+          case refParam: FormParameter   => ???
+          case refParam: PathParameter   => ???
+          case refParam: CookieParameter => ???
+          case refParam: QueryParameter  => ???
         }
         .headOption
 
-    val responseType: Option[String] =
+    val responseType: Option[Type] =
       operation.getResponses.asScala.toSeq
         .filter { case (status, _) => status.toInt >= 200 && status.toInt < 300 }
         .map { case (_, response) => response }
         .headOption
         .map { resp =>
-          propertyToType(resp.getSchema)
+          OpenApiV2ModelParser.propertyToType("Response", resp.getSchema)
         }
 
     val arguments = (pathParams(operation) ++ queryParams(operation)).map { param =>
-      CallArgument(param.getName, paramTypeDiscovery(param.asInstanceOf[AbstractSerializableParameter[_]]))
+      CallArgument(param.getName, paramTypeDiscovery(param.getName, param.asInstanceOf[AbstractSerializableParameter[_]]))
     }
 
     // TODO: normalize operationId name to a valid java/scala method name.
@@ -127,58 +195,14 @@ class OpenApiV2Parser(packageName: String) extends SpecParser[Swagger] {
   /**
    * Given a Parameter will generate a String with the Type info.
    */
-  private def paramTypeDiscovery(param: AbstractSerializableParameter[_]): String = {
+  private def paramTypeDiscovery(preferredName: String, param: AbstractSerializableParameter[_]): Type = {
     val (paramType, paramFormat) = (param.getType, param.getFormat) // p.getCollectionFormat
 
     if (paramType == "array") {
-      s"org.pcollections.PSequence<${propertyToType(param.getItems)}>"
+      LSequence(OpenApiV2ModelParser.propertyToType(preferredName, param.getItems))
     } else {
-      dataTypeConversion(paramType, paramFormat)
+      OpenApiV2ModelParser.dataTypeConversion(preferredName, paramType, paramFormat)
     }
-  }
-
-  // See https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#data-types
-  private def dataTypeConversion(`type`: String, format: String): String = {
-    // TODO: support other formats (email, uuid,... ???)
-    (`type`, format) match {
-      case ("integer", "int32")    => "int"
-      case ("integer", "int64")    => "long"
-      case ("number", "float")     => "float"
-      case ("number", "double")    => "double"
-      case ("string", _)           => "String"
-      case ("string", "byte")      => ??? // base64 encoded characters
-      case ("string", "binary")    => ??? // any sequence of octets
-      case ("boolean", _)          => "boolean"
-      case ("string", "date")      => ??? // As defined by full-date - RFC3339
-      case ("string", "date-time") => ??? // As defined by date-time - RFC3339
-      case ("string", "password")  => ??? // Used to hint UIs the input needs to be obscured
-    }
-  }
-
-  def propertyToType: PartialFunction[Property, String] = {
-    // TODO: don't use hardcoded collection type.
-    // TODO: support other formats (email, uuid,... ???)
-    case arr: ArrayProperty         => s"org.pcollections.PSequence<${propertyToType(arr.getItems)}>"
-    case ref: RefProperty           => ref.getSimpleRef
-
-    case email: EmailProperty       => ??? // it's a subclass of StringPropertye, must match before StringProperty
-    case str: StringProperty        => dataTypeConversion(str.getType, str.getFormat)
-    case binary: BinaryProperty     => ???
-    case byteArr: ByteArrayProperty => ???
-
-    case date: DateProperty         => ???
-    case dateTime: DateTimeProperty => ???
-    case uuid: UUIDProperty         => ???
-    case obj: ObjectProperty        => ???
-
-    case boolean: BooleanProperty   => ???
-    case integer: IntegerProperty   => ???
-    case long: LongProperty         => ???
-    case float: FloatProperty       => ???
-    case double: DoubleProperty     => ???
-
-    case file: FileProperty         => ???
-    case pwd: PasswordProperty      => ???
   }
 
   /**

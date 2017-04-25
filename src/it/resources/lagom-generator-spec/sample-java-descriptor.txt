@@ -3,14 +3,16 @@ package com.example.pet.api;
 import static com.lightbend.lagom.javadsl.api.Service.*;
 import com.lightbend.lagom.javadsl.api.*;
 import com.lightbend.lagom.javadsl.api.transport.*;
+import com.example.pet.api.Category;
+import com.example.pet.api.Tag;
 import com.example.pet.api.Pet;
-import com.example.pet.api.ModelApiResponse;
+import com.example.pet.api.ApiResponse;
 
 public interface PetApi extends Service {
 
     ServiceCall<Pet, akka.Done> addPet();
     ServiceCall<akka.NotUsed, akka.Done> deletePet(long petId);
-    ServiceCall<akka.NotUsed, org.pcollections.PSequence<Pet>> findPetsByStatus(org.pcollections.PSequence<String> status);
+    ServiceCall<akka.NotUsed, org.pcollections.PSequence<Pet>> findPetsByStatus(org.pcollections.PSequence<StatusEnum> status);
     ServiceCall<akka.NotUsed, org.pcollections.PSequence<Pet>> findPetsByTags(org.pcollections.PSequence<String> tags);
     ServiceCall<akka.NotUsed, Pet> getPetById(long petId);
     ServiceCall<Pet, akka.Done> updatePet();

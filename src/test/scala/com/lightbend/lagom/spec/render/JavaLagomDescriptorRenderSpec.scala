@@ -61,7 +61,7 @@ class JavaLagomDescriptorRenderSpec extends FlatSpec with Matchers {
   }
 
   it should "generate a method Handler with correct request and response types" in {
-    val call = Call(Method.GET, "", "", Some("String"), Some("Integer"))
+    val call = Call(Method.GET, "", "", Some(LString), Some(LInt))
     val handler = JavaLagomDescriptorRender.methodHandlers(Seq(call))
     handler should include("ServiceCall<String, Integer>")
   }
@@ -80,7 +80,7 @@ class JavaLagomDescriptorRenderSpec extends FlatSpec with Matchers {
   }
 
   it should "generate a method Handler without many arguments" in {
-    val call = Call(Method.GET, "", "asdf", arguments = Seq(CallArgument("id", "long"), CallArgument("name", "String")))
+    val call = Call(Method.GET, "", "asdf", arguments = Seq(CallArgument("id", LLong), CallArgument("name", LString)))
     val handler = JavaLagomDescriptorRender.methodHandlers(Seq(call))
     handler should include("(long id, String name);")
   }
@@ -117,7 +117,7 @@ class JavaLagomDescriptorRenderSpec extends FlatSpec with Matchers {
     val service = Service("com.example", "name")
 
     val handler = JavaLagomDescriptorRender.descriptor(service)
-    handler should not include ("withCalls")
+    handler should not include "withCalls"
   }
 
 }

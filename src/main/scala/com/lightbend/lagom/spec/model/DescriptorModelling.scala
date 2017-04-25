@@ -2,15 +2,15 @@ package com.lightbend.lagom.spec.model
 
 case class CallArgument(
   name: String, // TODO: use some abstraction to represent names
-  `type`: String
+  `type`: Type
 ) // TODO: use some abstraction to represent types
 
 case class Call(
   method: Method.Method,
   path: String,
   name: String, // TODO: use some abstraction to represent names
-  requestType: Option[String] = None, // TODO: use some abstraction to represent types
-  responseType: Option[String] = None, // TODO: use some abstraction to represent types
+  requestType: Option[Type] = None, // TODO: use some abstraction to represent types
+  responseType: Option[Type] = None, // TODO: use some abstraction to represent types
   arguments: Seq[CallArgument] = Seq.empty[CallArgument],
   autoAcl: Option[Boolean] = None
 )
@@ -27,9 +27,10 @@ object Method {
 }
 
 case class ModelField(
-  fieldType: String, // TODO: use some abstraction to represent types
+  fieldType: Type,
   fieldName: String
 )
+
 case class CustomModel(
   className: String,
   fields: Seq[ModelField] = Seq.empty[ModelField]

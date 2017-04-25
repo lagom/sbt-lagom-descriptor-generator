@@ -4,7 +4,7 @@ import org.scalatest.{ FlatSpec, Matchers }
 
 class JavaCustomModelGeneratorSpec extends FlatSpec with Matchers {
 
-  private val folder = "/java-model-generator-spec"
+  private val folder = "/java-custom-model-generator-spec"
   import ResourceUtils._
 
   behavior of "Descriptor Generator"

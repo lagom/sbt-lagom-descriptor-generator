@@ -1,6 +1,7 @@
 package com.lightbend.lagom.spec.render.descriptor
 
 import com.lightbend.lagom.spec.model.{ Call, CallArgument, Service }
+import com.lightbend.lagom.spec.render.model.JavaTypeRenderer
 
 /**
  *
@@ -15,13 +16,15 @@ object JavaLagomDescriptorRender extends LagomDescriptorRender {
     "com.lightbend.lagom.javadsl.api.transport.*"
   ))
 
+  import JavaTypeRenderer.renderType
+
   override def customImports(service: Service): String = importWriter(service.customModels.map(customModel => s"${service.`package`}.${customModel.className}"))
 
-  override def argument(arg: CallArgument): String = s"${arg.`type`} ${arg.name}"
+  override def argument(arg: CallArgument): String = s"${renderType(arg.`type`)} ${arg.name}"
 
   override def methodHandlers(calls: Seq[Call]): String = calls.map { call =>
-    val req = call.requestType.getOrElse("akka.NotUsed")
-    val resp = call.responseType.getOrElse("akka.Done")
+    val req = call.requestType.map(rt => renderType(rt, preferPrimitives = false)).getOrElse("akka.NotUsed")
+    val resp = call.responseType.map(rt => renderType(rt, preferPrimitives = false)).getOrElse("akka.Done")
     val args = call.arguments.map(argument).mkString(", ")
     s"ServiceCall<$req, $resp> ${call.name}($args);"
   }
