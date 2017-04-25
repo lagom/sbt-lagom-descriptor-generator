@@ -1,8 +1,9 @@
 package com.lightbend.lagom.spec
 
-import java.io.InputStream
+import java.io.{ File, InputStream }
+import java.nio.file.{ Files, Paths, StandardOpenOption }
 
-import scala.io.{ BufferedSource, Source }
+import scala.io.{ BufferedSource, Source };
 
 /**
  *
@@ -42,4 +43,25 @@ object ResourceUtils {
     }
   }
 
+  /**
+   * @param folder an absolute folder
+   * @param filename a relative path to a file (may contain File.separators)
+   * @param fileContents
+   * @return
+   */
+  def writeFile(folder: File, filename: String, fileContents: String): File = {
+    val path = Paths.get(folder.getAbsolutePath, filename)
+    val theFolder = path.toFile.getParentFile
+    while (!theFolder.exists()) {
+      theFolder.mkdirs()
+    }
+    Files.write(
+      path,
+      fileContents.getBytes,
+      StandardOpenOption.CREATE,
+      StandardOpenOption.SYNC,
+      StandardOpenOption.TRUNCATE_EXISTING
+    ).toFile
+
+  }
 }

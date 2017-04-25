@@ -3,6 +3,7 @@ import com.typesafe.sbt.SbtScalariform
 import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 import sbt.Keys.{ crossScalaVersions, libraryDependencies, scalacOptions, unmanagedSourceDirectories }
 
+import sbt.ScriptedPlugin
 import scala.collection.immutable
 import scalariform.formatter.preferences._
 
@@ -15,12 +16,12 @@ lazy val `root` = (project in file("."))
     `lagom-renderer-javadsl`,
     `lagom-renderer-scaladsl`,
     `runner`,
-    `sbt-plugin`
+    `lagom-descriptor-generator-sbt-plugin`
   )
   .settings(commonSettings: _*)
 
 lazy val commonSettings = Seq(
-  organization := "com.lightbend.lagom.generator",
+  organization := "com.lightbend.lagom",
   // Scala settings
   scalaVersion := Version.scala,
   crossScalaVersions := List(scalaVersion.value, "2.10.6"),
@@ -68,13 +69,16 @@ lazy val scripteTestsSettings =
       }.value
     )
 
+// copy/pasted from Lagom's build.sbt
+//def SbtPluginPlugins = AutomateHeaderPlugin && BintrayPlugin && PluginsAccessor.exclude(Sonatype)
 
-lazy val `sbt-plugin` = project
-  .in(file("sbt-plugin"))
+lazy val `lagom-descriptor-generator-sbt-plugin` = project
+  .in(file("lagom-descriptor-generator-sbt-plugin"))
+  .settings(scriptedSettings: _*)
+//  .enablePlugins(SbtPluginPlugins) // copy/pasted from Lagom's build.sbt
   .settings(
     sbtPlugin := true,
-    commonSettings,
-    commonScalariformSettings
+    commonSettings
   ).dependsOn(`runner`)
 
 lazy val `runner` = project
