@@ -1,0 +1,26 @@
+swagger: '2.0'
+info:
+  title: Sample API 2
+  description: some text in the desc 2
+  version: "1.0.0"
+# the domain of the service
+host: api2.another-example.com
+# array of all schemes that your API supports
+schemes:
+  - http
+# will be prefixed to all paths
+basePath: /api
+produces:
+  - application/json
+paths:
+  /path1:
+    get:
+      summary: Some summary
+      operationId: getSomethingMore
+      description: |
+        No description provided for my path
+      responses:
+        200:
+          description: A String
+          schema:
+            type: string

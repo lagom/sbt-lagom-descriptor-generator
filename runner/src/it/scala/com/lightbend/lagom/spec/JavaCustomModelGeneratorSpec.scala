@@ -14,7 +14,7 @@ class JavaCustomModelGeneratorSpec extends FlatSpec with Matchers {
     val packageName = "com.example.pet.api"
     val inputStream = resource(s"$folder/swagger.json")
 
-    val models = LagomGenerators.swaggerV2ToLagomJava(inputStream, packageName).models
+    val models = LagomGenerators.openApiV2ToLagomJava(inputStream, packageName, "pet").models
     val generated: String = models("Pet").fileContents
     val expected: String = loadContents(s"$folder/Pet.java.txt")
     expected should be(generated)
@@ -26,7 +26,7 @@ class JavaCustomModelGeneratorSpec extends FlatSpec with Matchers {
     val packageName = "com.example.pet.api"
     val inputStream = resource(s"$folder/swagger.json")
 
-    val models = LagomGenerators.swaggerV2ToLagomJava(inputStream, packageName).models
+    val models = LagomGenerators.openApiV2ToLagomJava(inputStream, packageName, "pet").models
     val generated: String = models("StatusEnum").fileContents
     val expected: String = loadContents(s"$folder/StatusEnum.java.txt")
     expected should be(generated)

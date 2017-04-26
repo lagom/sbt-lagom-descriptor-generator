@@ -14,7 +14,7 @@ class LagomGeneratorSpec extends FlatSpec with Matchers {
     val packageName = "com.example.pet.api"
     val inputStream = resource(s"$folder/swagger.json")
 
-    val generatedCode: String = LagomGenerators.swaggerV2ToLagomJava(inputStream, packageName).descriptor.fileContents
+    val generatedCode: String = LagomGenerators.openApiV2ToLagomJava(inputStream, packageName, "pet").descriptor.fileContents
     val expected: String = loadContents(s"$folder/sample-java-descriptor.txt")
     expected should be(generatedCode)
 

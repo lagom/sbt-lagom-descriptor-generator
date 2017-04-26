@@ -7,7 +7,7 @@ import org.scalatest.{ FlatSpec, Matchers }
 class OpenApiV2ParserSpec extends FlatSpec with Matchers {
   private val folder = "/openapi-v2-parser"
   private val packageName = "com.example.spec.pet"
-  private val openApiV2Parser = new OpenApiV2Parser(packageName)
+  private val openApiV2Parser = new OpenApiV2Parser(packageName, "pet")
   private val service = openApiV2Parser.read(resource(s"$folder/swagger.json"))
 
   behavior of "OpenApiV2Parser"

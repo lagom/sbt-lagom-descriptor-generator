@@ -11,11 +11,16 @@ import io.swagger.parser.SwaggerParser
 
 import scala.collection.JavaConverters._
 
+// TODO: SwaggerParser returns an object where anything and everything can be null. This code needs stronger protection to NPE. :sadface:
 object OpenApiV2ModelParser {
 
   def parseModel(swagger: Swagger): Set[CustomType] = {
 
-    swagger.getDefinitions.asScala.flatMap {
+    val definitions = swagger.getDefinitions
+    if (definitions == null)
+      return Set.empty[CustomType]
+
+    definitions.asScala.flatMap {
       case (name, sModel) =>
         val fields: Seq[ModelField] = sModel.getProperties.asScala.map {
           case (fieldName, sProperty) =>
@@ -104,7 +109,7 @@ object OpenApiV2ModelParser {
 
 }
 
-class OpenApiV2Parser(packageName: String) extends SpecParser[Swagger] {
+class OpenApiV2Parser(packageName: String, serviceName: String) extends SpecParser[Swagger] {
 
   override val parse: (InputStream) => Swagger = { inputStream =>
     val swaggerAsString = ResourceUtils.loadContents(inputStream)
@@ -114,7 +119,7 @@ class OpenApiV2Parser(packageName: String) extends SpecParser[Swagger] {
   override val convert: (Swagger) => Service = { swagger =>
     Service(
       `package` = packageName,
-      name = serviceName(swagger),
+      name = serviceName,
       calls = convertCalls(swagger),
       customModels = OpenApiV2ModelParser.parseModel(swagger),
       // building code from a spec usually means it's public endpoints.
@@ -123,24 +128,13 @@ class OpenApiV2Parser(packageName: String) extends SpecParser[Swagger] {
     )
   }
 
-  def serviceName(swagger: Swagger): String = {
-    val tags: Iterable[String] = for {
-      path <- swagger.getPaths.asScala.values
-      operation <- path.getOperations.asScala
-      tag <- operation.getTags.asScala
-    } yield {
-      tag
-    }
-    // use the most common tag as service name.
-    tags.groupBy(identity).mapValues(_.size).maxBy(_._2)._1
-  }
-
   def convertCalls(swagger: Swagger): Seq[Call] = {
     val basePath = swagger.getBasePath
     (for {
       (uriPath, swaggerPath) <- swagger.getPaths.asScala.toSeq
       (method, operation) <- swaggerPath.getOperationMap.asScala.toSeq
     } yield {
+      // TODO: `operationId` may be null in the underlying json/yaml. Treat the null case here.
       asCall(swaggerPath, operation, method, basePath, uriPath)
     }).sortBy(_.name)
   }

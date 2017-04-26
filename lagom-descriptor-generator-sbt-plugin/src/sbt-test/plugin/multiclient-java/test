@@ -1,0 +1,12 @@
+# Structure of this test:
+# =======================
+
+# In this test a hand-made lagom service consumes many downstream services specified by many swagger-json files in
+# the hello-impl 'resources/' folder. Consumed services are used on a test.
+
+> clean
+> compile
+> test
+$ exists petstore-api/target/scala-2.11/openapi/main/java/com/example/PetApi.java
+$ exists petstore-api/target/scala-2.11/openapi/main/java/com/example/StatusEnum.java
+$ exists petstore-api/target/scala-2.11/openapi/main/java/com/example/Pet.java
