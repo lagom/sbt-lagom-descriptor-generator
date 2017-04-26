@@ -95,7 +95,7 @@ object JavaPojoRender {
        |        return sj.toString();
        |    }
        |
-      |    private String toString(Object o) {
+       |    private String toString(Object o) {
        |        if (o == null) {
        |            return "null";
        |        } else {

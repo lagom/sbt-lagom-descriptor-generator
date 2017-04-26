@@ -18,18 +18,13 @@ public enum StatusEnum {
       return value;
     }
 
-    @Override
-    public String toString() {
-      return String.valueOf(value);
-    }
-
     @com.fasterxml.jackson.annotation.JsonCreator
     public static StatusEnum fromValue(String text) {
       for (StatusEnum b : StatusEnum.values()) {
-        if (String.valueOf(b.value).equals(text)) {
+        if (b.value.equals(text)) {
           return b;
         }
       }
       return null;
     }
-  }
+}
