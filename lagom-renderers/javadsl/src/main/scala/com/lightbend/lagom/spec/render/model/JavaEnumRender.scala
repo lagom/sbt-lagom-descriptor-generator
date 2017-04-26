@@ -18,34 +18,27 @@ object JavaEnumRender {
     s"""public enum ${customEnum.className} {
        |${enumValues(customEnum)};
        |
-      |    private final String value;
+       |    private final String value;
        |
-      |    ${customEnum.className}(String value) {
+       |    ${customEnum.className}(String value) {
        |      this.value = value;
        |    }
        |
-      |    @com.fasterxml.jackson.annotation.JsonValue
+       |    @com.fasterxml.jackson.annotation.JsonValue
        |    public String getValue() {
        |      return value;
        |    }
        |
-      |    @Override
-       |    public String toString() {
-       |      return String.valueOf(value);
-       |    }
-       |
-      |    @com.fasterxml.jackson.annotation.JsonCreator
+       |    @com.fasterxml.jackson.annotation.JsonCreator
        |    public static ${customEnum.className} fromValue(String text) {
        |      for (${customEnum.className} b : ${customEnum.className}.values()) {
-       |        if (String.valueOf(b.value).equals(text)) {
+       |        if (b.value.equals(text)) {
        |          return b;
        |        }
        |      }
        |      return null;
        |    }
-       |  }
-       |
-    """.stripMargin
+       |}""".stripMargin
 
   }
 
