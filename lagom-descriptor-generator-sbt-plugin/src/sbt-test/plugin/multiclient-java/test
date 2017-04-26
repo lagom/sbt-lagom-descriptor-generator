@@ -7,6 +7,3 @@
 > clean
 > compile
 > test
-$ exists petstore-api/target/scala-2.11/openapi/main/java/com/example/PetApi.java
-$ exists petstore-api/target/scala-2.11/openapi/main/java/com/example/StatusEnum.java
-$ exists petstore-api/target/scala-2.11/openapi/main/java/com/example/Pet.java
