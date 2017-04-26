@@ -1,10 +1,11 @@
 # Structure of this test:
 # =======================
 
-# Here we test the swagger to java lagom descriptor and model generators
+# Here we test that the swagger-to-java lagom descriptor and model generators create files on compilation time without
+# further intervention. The contents are not asserted
 
 > clean
 > compile
-> verifyDescriptor
-> verifyPojo
-> verifyEnum
+$ exists petstore-api/target/scala-2.11/openapi/main/java/com/example/PetApi.java
+$ exists petstore-api/target/scala-2.11/openapi/main/java/com/example/StatusEnum.java
+$ exists petstore-api/target/scala-2.11/openapi/main/java/com/example/Pet.java
