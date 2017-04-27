@@ -24,7 +24,7 @@ object LagomOpenApiPlugin extends AutoPlugin {
 
     target in lagomOpenAPIGenerateDescriptor :=
       crossTarget.value / "openapi" / Defaults.nameForSrc(configuration.value.name),
-    lagomOpenAPIGenerateDescriptor := LagomOpenApiGenerator.lagomOpenAPIGenerateDescriptorTask.value,
+    lagomOpenAPIGenerateDescriptor := LagomOpenApiGenerator.lagomOpenAPIGenerateDescriptorTask().value,
     sourceGenerators <+= lagomOpenAPIGenerateDescriptor,
     // TODO: review managedSources
     managedSourceDirectories += (target in lagomOpenAPIGenerateDescriptor).value / "java",
