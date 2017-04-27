@@ -1,0 +1,10 @@
+# Structure of this test:
+# =======================
+
+# Here we test that the swagger-to-java lagom descriptor and model generators create files on compilation time without
+# further intervention. The contents are not asserted
+
+> clean
+> compile
+$ assertFileContains  petstore-api/target/scala-2.11/openapi/main/scala/com/example/PetModels.scala case class Pet
+$ exists              petstore-api/target/scala-2.11/openapi/main/scala/com/example/PetApi.scala
