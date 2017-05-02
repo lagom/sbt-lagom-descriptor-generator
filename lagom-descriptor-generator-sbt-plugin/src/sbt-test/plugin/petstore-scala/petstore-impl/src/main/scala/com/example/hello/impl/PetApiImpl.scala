@@ -1,7 +1,7 @@
 
 package com.example.hello.impl
 
-import com.example.PetApi
+import com.example._
 
 class PetApiImpl extends PetApi {
 
@@ -9,9 +9,9 @@ class PetApiImpl extends PetApi {
 
   override def deletePet(petId: Long) = null
 
-  override def findPetsByStatus(status: Nothing) = null
+  override def findPetsByStatus(status: StatusEnum.StatusEnum) = null
 
-  override def findPetsByTags(tags: Nothing) = null
+  override def findPetsByTags(tags: Tag) = null
 
   override def getPetById(petId: Long) = null
 

@@ -2,7 +2,7 @@ package com.lightbend.lagom.spec.render.descriptor
 
 import com.lightbend.lagom.spec.model.{ Call, CallArgument, Service }
 import com.lightbend.lagom.spec.render.LagomDescriptorRender
-import com.lightbend.lagom.spec.render.model.JavaTypeRenderer
+import com.lightbend.lagom.spec.render.model.JavaTypeRender
 
 /**
  *
@@ -11,15 +11,20 @@ object JavaLagomDescriptorRender extends LagomDescriptorRender {
 
   override def packageDeclaration(service: Service): String = s"package ${service.`package`};"
 
+  override def importWriter(fqcns: Set[String]): String = {
+    fqcns.map(fqcn => s"import $fqcn;").mkString("\n")
+  }
+
   override val lagomImports: String = importWriter(Set(
     "static com.lightbend.lagom.javadsl.api.Service.*",
     "com.lightbend.lagom.javadsl.api.*",
     "com.lightbend.lagom.javadsl.api.transport.*"
   ))
 
-  import JavaTypeRenderer.renderType
+  import JavaTypeRender.renderType
 
-  override def customImports(service: Service): String = importWriter(service.customModels.map(customModel => s"${service.`package`}.${customModel.className}"))
+  override def customImports(service: Service): String =
+    importWriter(service.customModels.map(customModel => s"${service.`package`}.${customModel.className}"))
 
   override def argument(arg: CallArgument): String = s"${renderType(arg.`type`)} ${arg.name}"
 
@@ -50,8 +55,6 @@ object JavaLagomDescriptorRender extends LagomDescriptorRender {
     s"""named("${service.name}")$withCalls$withAutoAcl;"""
   }
 
-  private def tabs(count: Int)(input: String): String = " " * count + input
-
   override def serviceDefinition(service: Service) =
     s"""
        |public interface ${interfaceName(service)} extends Service {
@@ -62,9 +65,5 @@ object JavaLagomDescriptorRender extends LagomDescriptorRender {
        |        return ${descriptor(service)}
        |    }
        |}""".stripMargin.trim
-
-  override def importWriter(fqcns: Set[String]): String = {
-    fqcns.map(fqcn => s"import $fqcn;").mkString("\n")
-  }
 
 }

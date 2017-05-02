@@ -14,11 +14,11 @@ import sbt._
 object LagomOpenApiGenerator {
 
   /**
-    * Decide whether java or scala code should be generated from the dependencies in the project. Will
-    * look for dependencies named "lagom-javadsl.*" or "lagom-scaladsl.*" in the list of dependencies.
-    *
-    * @return
-    */
+   * Decide whether java or scala code should be generated from the dependencies in the project. Will
+   * look for dependencies named "lagom-javadsl.*" or "lagom-scaladsl.*" in the list of dependencies.
+   *
+   * @return
+   */
   def dslDiscoveryTask: Def.Initialize[Task[String]] = Def.task {
     // TODO: not sure this is the best approach but
     val deps = allDependencies.value
@@ -53,7 +53,8 @@ object LagomOpenApiGenerator {
     lang match {
       case "java" =>
         LagomGenerators.openApiV2ToLagomJava(new FileInputStream(specFile.getAbsoluteFile), packageName, serviceName)
-      case _ => ???
+      case _ =>
+        LagomGenerators.openApiV2ToLagomScala(new FileInputStream(specFile.getAbsoluteFile), packageName, serviceName)
     }
   }
 
