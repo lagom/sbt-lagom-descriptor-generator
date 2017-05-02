@@ -10,7 +10,7 @@ object JavaPojoRender {
 
   def packageDeclaration(service: Service): String = s"package ${service.`package`};"
 
-  import JavaTypeRenderer.renderType
+  import JavaTypeRender.renderType
 
   private def fields(model: CustomModel): String = {
     model.fields.map { field =>

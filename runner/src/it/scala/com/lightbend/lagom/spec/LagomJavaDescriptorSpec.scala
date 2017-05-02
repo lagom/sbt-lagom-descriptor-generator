@@ -2,9 +2,9 @@ package com.lightbend.lagom.spec
 
 import org.scalatest.{ FlatSpec, Matchers }
 
-class LagomGeneratorSpec extends FlatSpec with Matchers {
+class LagomJavaDescriptorSpec extends FlatSpec with Matchers {
 
-  private val folder = "/lagom-generator-spec"
+  private val folder = "/lagom-java-descriptor-spec"
   import ResourceUtils._
 
   behavior of "Descriptor Generator"

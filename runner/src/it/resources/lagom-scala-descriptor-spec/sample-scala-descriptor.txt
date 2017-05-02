@@ -1,0 +1,32 @@
+package com.example.pet.api
+
+import com.lightbend.lagom.scaladsl.api.Service._
+import com.lightbend.lagom.scaladsl.api._
+import com.lightbend.lagom.scaladsl.api.transport._
+
+
+trait PetApi extends Service {
+
+    def addPet(): ServiceCall[Pet, akka.Done]
+    def deletePet(petId: Long): ServiceCall[akka.NotUsed, akka.Done]
+    def findPetsByStatus(status: scala.collection.immutable.Seq[StatusEnum.StatusEnum]): ServiceCall[akka.NotUsed, scala.collection.immutable.Seq[Pet]]
+    def findPetsByTags(tags: scala.collection.immutable.Seq[String]): ServiceCall[akka.NotUsed, scala.collection.immutable.Seq[Pet]]
+    def getPetById(petId: Long): ServiceCall[akka.NotUsed, Pet]
+    def updatePet(): ServiceCall[Pet, akka.Done]
+    def updatePetWithForm(petId: Long): ServiceCall[akka.NotUsed, akka.Done]
+
+    final override def descriptor: Descriptor = {
+        named("pet").withCalls(
+                restCall(Method.POST, "/v2/pet", addPet _),
+                restCall(Method.DELETE, "/v2/pet/:petId", deletePet _),
+                restCall(Method.GET, "/v2/pet/findByStatus?status", findPetsByStatus _),
+                restCall(Method.GET, "/v2/pet/findByTags?tags", findPetsByTags _),
+                restCall(Method.GET, "/v2/pet/:petId", getPetById _),
+                restCall(Method.PUT, "/v2/pet", updatePet _),
+                restCall(Method.POST, "/v2/pet/:petId", updatePetWithForm _)
+        ).withAutoAcl(true)
+    }
+
+    implicit val pathParamSerializer: PathParamSerializer[StatusEnum] = PathParamSerializer.required("status")(StatusEnum.withName)(_.toString)
+
+}

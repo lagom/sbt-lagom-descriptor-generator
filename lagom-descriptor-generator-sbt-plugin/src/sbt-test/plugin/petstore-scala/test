@@ -6,5 +6,5 @@
 
 > clean
 > compile
-$ assertFileContains  petstore-api/target/scala-2.11/openapi/main/scala/com/example/PetModels.scala case class Pet
+$ assertFileContains  petstore-api/target/scala-2.11/openapi/main/scala/com/example/Pet.scala case class Pet
 $ exists              petstore-api/target/scala-2.11/openapi/main/scala/com/example/PetApi.scala
