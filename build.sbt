@@ -7,8 +7,11 @@ import sbt.ScriptedPlugin
 import scala.collection.immutable
 import scalariform.formatter.preferences._
 
+import de.heikoseeberger.sbtheader._
+
 
 lazy val `root` = (project in file("."))
+  .enablePlugins(AutomateHeaderPlugin)
   .settings(name := "sbt-lagom-descriptor-generator")
   .aggregate(
     `generator-api`,
@@ -25,7 +28,22 @@ lazy val commonSettings = Seq(
   // Scala settings
   scalaVersion := Version.scala,
   crossScalaVersions := List(scalaVersion.value, "2.10.6"),
-  scalacOptions ++= List(
+  headers := headers.value ++ Map(
+    "scala" -> (
+      HeaderPattern.cStyleBlockComment,
+      """|/*
+         | * Copyright (C) 2016-2017 Lightbend Inc. <https://www.lightbend.com>
+         | */
+         |""".stripMargin
+    ),
+    "java" -> (
+      HeaderPattern.cStyleBlockComment,
+      """|/*
+         | * Copyright (C) 2016-2017 Lightbend Inc. <https://www.lightbend.com>
+         | */
+         |""".stripMargin
+    )
+  ),  scalacOptions ++= List(
     "-unchecked",
     "-deprecation",
     "-language:_",
@@ -70,7 +88,10 @@ lazy val scripteTestsSettings =
     )
 
 // copy/pasted from Lagom's build.sbt
+def RuntimeLibPlugins = AutomateHeaderPlugin
+//def RuntimeLibPlugins = AutomateHeaderPlugin && Sonatype && PluginsAccessor.exclude(BintrayPlugin)
 //def SbtPluginPlugins = AutomateHeaderPlugin && BintrayPlugin && PluginsAccessor.exclude(Sonatype)
+
 
 lazy val `lagom-descriptor-generator-sbt-plugin` = project
   .in(file("lagom-descriptor-generator-sbt-plugin"))
@@ -78,11 +99,13 @@ lazy val `lagom-descriptor-generator-sbt-plugin` = project
 //  .enablePlugins(SbtPluginPlugins) // copy/pasted from Lagom's build.sbt
   .settings(
     sbtPlugin := true,
+    commonScalariformSettings,
     commonSettings
   ).dependsOn(`runner`)
 
 lazy val `runner` = project
   .in(file("runner"))
+  .enablePlugins(RuntimeLibPlugins) // copy/pasted from Lagom's build.sbt
   .configs(IntegrationTest)
   .settings(
     commonSettings,
@@ -101,6 +124,7 @@ lazy val `runner` = project
 
 lazy val `lagom-renderer-javadsl` = project
   .in(file("lagom-renderers") / "javadsl")
+  .enablePlugins(RuntimeLibPlugins) // copy/pasted from Lagom's build.sbt
   .settings(
     commonSettings,
     commonScalariformSettings,
@@ -111,6 +135,7 @@ lazy val `lagom-renderer-javadsl` = project
 
 lazy val `lagom-renderer-scaladsl` = project
   .in(file("lagom-renderers") / "scaladsl")
+  .enablePlugins(RuntimeLibPlugins) // copy/pasted from Lagom's build.sbt
   .settings(
     commonSettings,
     commonScalariformSettings,
@@ -121,6 +146,7 @@ lazy val `lagom-renderer-scaladsl` = project
 
 lazy val `openapi-parser` = project
   .in(file("spec-parsers") / "openapi")
+  .enablePlugins(RuntimeLibPlugins) // copy/pasted from Lagom's build.sbt
   .settings(
     commonSettings,
     commonScalariformSettings,
@@ -132,6 +158,7 @@ lazy val `openapi-parser` = project
 
 lazy val `generator-api` = project
   .in(file("generator-api"))
+  .enablePlugins(RuntimeLibPlugins) // copy/pasted from Lagom's build.sbt
   .settings(
     commonSettings,
     commonScalariformSettings,
