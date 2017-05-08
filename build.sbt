@@ -1,9 +1,7 @@
-import bintray.Keys._
 import com.typesafe.sbt.SbtScalariform
 import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 import sbt.Keys.{ crossScalaVersions, libraryDependencies, scalacOptions, unmanagedSourceDirectories }
 
-import sbt.ScriptedPlugin
 import scala.collection.immutable
 import scalariform.formatter.preferences._
 
@@ -65,17 +63,41 @@ lazy val commonScalariformSettings: immutable.Seq[Setting[_]] =
       .setPreference(DanglingCloseParenthesis, Force)
   )
 
-// not used
 lazy val bintraySettings = Seq(
   // Release + Bintray settings
   licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html")),
   publishMavenStyle := false
 ) ++
-  bintrayPublishSettings ++
   Seq(
-    repository in bintray := "sbt-plugins",
-    bintrayOrganization in bintray := Some("sbt-lagom-descriptor-generator")
+    bintrayOrganization := Some("lagom"),
+    bintrayRepository := "sbt-plugin-releases",
+    bintrayPackage := "sbt-lagom-descriptor-generator",
+    bintrayReleaseOnPublish := false
   )
+
+
+def releaseSettings: Seq[Setting[_]] = Seq(
+  releasePublishArtifactsAction := PgpKeys.publishSigned.value,
+  releaseTagName := (version in ThisBuild).value,
+  releaseProcess := {
+    import ReleaseTransformations._
+
+    Seq[ReleaseStep](
+      checkSnapshotDependencies,
+      inquireVersions,
+      setReleaseVersion,
+      commitReleaseVersion,
+      tagRelease,
+      publishArtifacts,
+      releaseStepTask(bintrayRelease in thisProjectRef.value),
+      releaseStepCommand("sonatypeRelease"),
+      setNextVersion,
+      commitNextVersion,
+        pushChanges
+    )
+  }
+)
+
 
 lazy val scripteTestsSettings =
   scriptedSettings ++
@@ -85,20 +107,21 @@ lazy val scripteTestsSettings =
       }.value
     )
 
-// copy/pasted from Lagom's build.sbt
-def RuntimeLibPlugins = AutomateHeaderPlugin
+def RuntimeLibPlugins = AutomateHeaderPlugin && PluginsAccessor.exclude(BintrayPlugin)
 //def RuntimeLibPlugins = AutomateHeaderPlugin && Sonatype && PluginsAccessor.exclude(BintrayPlugin)
-//def SbtPluginPlugins = AutomateHeaderPlugin && BintrayPlugin && PluginsAccessor.exclude(Sonatype)
+def SbtPluginPlugins = AutomateHeaderPlugin && BintrayPlugin
 
 
 lazy val `lagom-descriptor-generator-sbt-plugin` = project
   .in(file("lagom-descriptor-generator-sbt-plugin"))
   .settings(scripteTestsSettings: _*)
-//  .enablePlugins(SbtPluginPlugins) // copy/pasted from Lagom's build.sbt
+  .enablePlugins(SbtPluginPlugins)
   .settings(
     sbtPlugin := true,
     commonScalariformSettings,
-    commonSettings
+    commonSettings,
+    bintraySettings,
+    releaseSettings
   ).dependsOn(`runner`)
 
 lazy val `runner` = project
