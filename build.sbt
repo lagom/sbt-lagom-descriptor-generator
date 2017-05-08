@@ -9,7 +9,7 @@ import de.heikoseeberger.sbtheader._
 
 
 lazy val `root` = (project in file("."))
-  .enablePlugins(AutomateHeaderPlugin)
+  .enablePlugins(AutomateHeaderPlugin && PluginsAccessor.exclude(BintrayPlugin))
   .settings(name := "sbt-lagom-descriptor-generator")
   .aggregate(
     `generator-api`,
@@ -21,37 +21,42 @@ lazy val `root` = (project in file("."))
   )
   .settings(commonSettings: _*)
 
-lazy val commonSettings = Seq(
-  organization := "com.lightbend.lagom",
-  // Scala settings
-  scalaVersion := Version.scala,
-  crossScalaVersions := List(scalaVersion.value, "2.10.6"),
-  headers := headers.value ++ Map(
-    "scala" -> (
-      HeaderPattern.cStyleBlockComment,
-      """|/*
-         | * Copyright (C) 2016-2017 Lightbend Inc. <https://www.lightbend.com>
-         | */
-         |""".stripMargin
-    ),
-    "java" -> (
-      HeaderPattern.cStyleBlockComment,
-      """|/*
-         | * Copyright (C) 2016-2017 Lightbend Inc. <https://www.lightbend.com>
-         | */
-         |""".stripMargin
+lazy val commonSettings =
+  Seq(
+    organization := "com.lightbend.lagom",
+    // Scala settings
+    scalaVersion := Version.scala,
+    crossScalaVersions := List(scalaVersion.value, "2.10.6")) ++
+    Seq(
+      licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html"))
+    ) ++
+    Seq(
+      headers := headers.value ++ Map(
+        "scala" -> (
+          HeaderPattern.cStyleBlockComment,
+          """|/*
+             | * Copyright (C) 2016-2017 Lightbend Inc. <https://www.lightbend.com>
+             | */
+             |""".stripMargin
+        ),
+        "java" -> (
+          HeaderPattern.cStyleBlockComment,
+          """|/*
+             | * Copyright (C) 2016-2017 Lightbend Inc. <https://www.lightbend.com>
+             | */
+             |""".stripMargin
+        )
+      ), scalacOptions ++= List(
+        "-unchecked",
+        "-deprecation",
+        "-language:_",
+        "-target:jvm-1.7", // target "jvm-1.8" was not added until scala 2.11.5 (https://issues.scala-lang.org/browse/SI-8966)
+        "-encoding", "UTF-8"
+      ),
+      unmanagedSourceDirectories in Compile := List((scalaSource in Compile).value),
+      unmanagedSourceDirectories in Test := List((scalaSource in Test).value),
+      unmanagedSourceDirectories in IntegrationTest := List((scalaSource in Test).value)
     )
-  ),  scalacOptions ++= List(
-    "-unchecked",
-    "-deprecation",
-    "-language:_",
-    "-target:jvm-1.7", // target "jvm-1.8" was not added until scala 2.11.5 (https://issues.scala-lang.org/browse/SI-8966)
-    "-encoding", "UTF-8"
-  ),
-  unmanagedSourceDirectories in Compile := List((scalaSource in Compile).value),
-  unmanagedSourceDirectories in Test := List((scalaSource in Test).value),
-  unmanagedSourceDirectories in IntegrationTest := List((scalaSource in Test).value)
-)
 
 lazy val commonScalariformSettings: immutable.Seq[Setting[_]] =
   SbtScalariform.scalariformSettings ++ Seq(
@@ -63,9 +68,7 @@ lazy val commonScalariformSettings: immutable.Seq[Setting[_]] =
       .setPreference(DanglingCloseParenthesis, Force)
   )
 
-lazy val bintraySettings = Seq(
-  // Release + Bintray settings
-  licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html")),
+def bintraySettings = Seq(
   publishMavenStyle := false
 ) ++
   Seq(
@@ -93,7 +96,7 @@ def releaseSettings: Seq[Setting[_]] = Seq(
       releaseStepCommand("sonatypeRelease"),
       setNextVersion,
       commitNextVersion,
-        pushChanges
+      pushChanges
     )
   }
 )
@@ -109,7 +112,7 @@ lazy val scripteTestsSettings =
 
 def RuntimeLibPlugins = AutomateHeaderPlugin && PluginsAccessor.exclude(BintrayPlugin)
 //def RuntimeLibPlugins = AutomateHeaderPlugin && Sonatype && PluginsAccessor.exclude(BintrayPlugin)
-def SbtPluginPlugins = AutomateHeaderPlugin && BintrayPlugin
+def SbtPluginPlugins = AutomateHeaderPlugin && BintrayPlugin && PluginsAccessor.exclude(Sonatype)
 
 
 lazy val `lagom-descriptor-generator-sbt-plugin` = project
@@ -118,15 +121,15 @@ lazy val `lagom-descriptor-generator-sbt-plugin` = project
   .enablePlugins(SbtPluginPlugins)
   .settings(
     sbtPlugin := true,
-    commonScalariformSettings,
-    commonSettings,
     bintraySettings,
-    releaseSettings
+    releaseSettings,
+    commonScalariformSettings,
+    commonSettings
   ).dependsOn(`runner`)
 
 lazy val `runner` = project
   .in(file("runner"))
-  .enablePlugins(RuntimeLibPlugins) // copy/pasted from Lagom's build.sbt
+  .enablePlugins(RuntimeLibPlugins)
   .configs(IntegrationTest)
   .settings(
     commonSettings,
@@ -145,7 +148,7 @@ lazy val `runner` = project
 
 lazy val `lagom-renderer-javadsl` = project
   .in(file("lagom-renderers") / "javadsl")
-  .enablePlugins(RuntimeLibPlugins) // copy/pasted from Lagom's build.sbt
+  .enablePlugins(RuntimeLibPlugins)
   .settings(
     commonSettings,
     commonScalariformSettings,
@@ -156,7 +159,7 @@ lazy val `lagom-renderer-javadsl` = project
 
 lazy val `lagom-renderer-scaladsl` = project
   .in(file("lagom-renderers") / "scaladsl")
-  .enablePlugins(RuntimeLibPlugins) // copy/pasted from Lagom's build.sbt
+  .enablePlugins(RuntimeLibPlugins)
   .settings(
     commonSettings,
     commonScalariformSettings,
@@ -167,7 +170,7 @@ lazy val `lagom-renderer-scaladsl` = project
 
 lazy val `openapi-parser` = project
   .in(file("spec-parsers") / "openapi")
-  .enablePlugins(RuntimeLibPlugins) // copy/pasted from Lagom's build.sbt
+  .enablePlugins(RuntimeLibPlugins)
   .settings(
     commonSettings,
     commonScalariformSettings,
@@ -179,7 +182,7 @@ lazy val `openapi-parser` = project
 
 lazy val `generator-api` = project
   .in(file("generator-api"))
-  .enablePlugins(RuntimeLibPlugins) // copy/pasted from Lagom's build.sbt
+  .enablePlugins(RuntimeLibPlugins)
   .settings(
     commonSettings,
     commonScalariformSettings,
