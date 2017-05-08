@@ -6,6 +6,7 @@ import sbt._
 
 object Version {
   val scalaTest         = "3.0.1"
+  // scala version must stay on 2.10.6 since this code is meant to be runnable from sbt.
   val scala             = "2.10.6"
   val swaggerParser     = "1.0.28"
 }
