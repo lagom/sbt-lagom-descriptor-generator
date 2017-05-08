@@ -77,9 +77,7 @@ lazy val bintraySettings = Seq(
     bintrayOrganization in bintray := Some("sbt-lagom-descriptor-generator")
   )
 
-// not used
 lazy val scripteTestsSettings =
-// Scripted test settings
   scriptedSettings ++
     Seq(
       scriptedLaunchOpts += {
@@ -95,7 +93,7 @@ def RuntimeLibPlugins = AutomateHeaderPlugin
 
 lazy val `lagom-descriptor-generator-sbt-plugin` = project
   .in(file("lagom-descriptor-generator-sbt-plugin"))
-  .settings(scriptedSettings: _*)
+  .settings(scripteTestsSettings: _*)
 //  .enablePlugins(SbtPluginPlugins) // copy/pasted from Lagom's build.sbt
   .settings(
     sbtPlugin := true,

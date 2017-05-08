@@ -5,7 +5,6 @@
 import sbt._
 
 object Version {
-  val lagom             = "1.4.0-SNAPSHOT"
   val scalaTest         = "3.0.1"
   val scala             = "2.10.6"
   val swaggerParser     = "1.0.28"
