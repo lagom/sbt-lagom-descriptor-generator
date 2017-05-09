@@ -9,7 +9,7 @@ import de.heikoseeberger.sbtheader._
 
 
 lazy val `root` = (project in file("."))
-  .enablePlugins(AutomateHeaderPlugin && PluginsAccessor.exclude(BintrayPlugin) && PluginsAccessor.exclude(Sonatype))
+  .enablePlugins(AutomateHeaderPlugin)
   .settings(name := "sbt-lagom-descriptor-generator")
   .aggregate(
     `generator-api`,
@@ -20,6 +20,11 @@ lazy val `root` = (project in file("."))
     `lagom-descriptor-generator-sbt-plugin`
   )
   .settings(commonSettings: _*)
+  .settings(
+    publishLocal := {},
+    publishArtifact in Compile := false,
+    publish := {}
+  )
 
 lazy val commonSettings =
   Seq(
@@ -29,6 +34,9 @@ lazy val commonSettings =
     crossScalaVersions := List(scalaVersion.value, "2.10.6")) ++
     Seq(
       licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html"))
+    ) ++
+    Seq(
+      PgpKeys.publishSigned := {}
     ) ++
     Seq(
       headers := headers.value ++ Map(
@@ -124,7 +132,13 @@ lazy val `lagom-descriptor-generator-sbt-plugin` = project
     bintraySettings,
     releaseSettings,
     commonScalariformSettings,
-    commonSettings
+    commonSettings,
+    publishTo := {
+      if (isSnapshot.value) {
+//         Bintray doesn't support publishing snapshots, publish to Sonatype snapshots instead
+        Some(Opts.resolver.sonatypeSnapshots)
+      } else publishTo.value
+    }
   ).dependsOn(`runner`)
 
 lazy val `runner` = project
