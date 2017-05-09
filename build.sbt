@@ -1,10 +1,9 @@
 import com.typesafe.sbt.SbtScalariform
 import com.typesafe.sbt.SbtScalariform.ScalariformKeys
-import sbt.Keys.{ crossScalaVersions, libraryDependencies, scalacOptions, unmanagedSourceDirectories }
+import sbt.Keys.{ crossScalaVersions, homepage, libraryDependencies, scalacOptions, unmanagedSourceDirectories }
 
 import scala.collection.immutable
 import scalariform.formatter.preferences._
-
 import de.heikoseeberger.sbtheader._
 
 
@@ -29,14 +28,12 @@ lazy val `root` = (project in file("."))
 lazy val commonSettings =
   Seq(
     organization := "com.lightbend.lagom",
+    licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html")),
+    homepage := Some(url("https://github.com/lagom/sbt-lagom-descriptor-generator")),
+    sonatypeProfileName := "com.lightbend",
     // Scala settings
     scalaVersion := Version.scala,
-    crossScalaVersions := List(scalaVersion.value, "2.10.6")) ++
-    Seq(
-      licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html"))
-    ) ++
-    Seq(
-      PgpKeys.publishSigned := {}
+    crossScalaVersions := List(scalaVersion.value, "2.10.6")
     ) ++
     Seq(
       headers := headers.value ++ Map(
@@ -82,7 +79,7 @@ def bintraySettings = Seq(
   Seq(
     bintrayOrganization := Some("lagom"),
     bintrayRepository := "sbt-plugin-releases",
-    bintrayPackage := "sbt-lagom-descriptor-generator",
+    bintrayPackage := "lagom-descriptor-generator-sbt-plugin",
     bintrayReleaseOnPublish := false
   )
 
@@ -118,27 +115,31 @@ lazy val scripteTestsSettings =
       }.value
     )
 
-def RuntimeLibPlugins = AutomateHeaderPlugin && PluginsAccessor.exclude(BintrayPlugin)
+def RuntimeLibPlugins = AutomateHeaderPlugin && Sonatype && PluginsAccessor.exclude(BintrayPlugin)
 //def RuntimeLibPlugins = AutomateHeaderPlugin && Sonatype && PluginsAccessor.exclude(BintrayPlugin)
 def SbtPluginPlugins = AutomateHeaderPlugin && BintrayPlugin && PluginsAccessor.exclude(Sonatype)
 
 
 lazy val `lagom-descriptor-generator-sbt-plugin` = project
   .in(file("lagom-descriptor-generator-sbt-plugin"))
+  .settings(
+    releaseSettings,
+    bintraySettings,
+    commonSettings,
+    commonScalariformSettings
+  )
   .settings(scripteTestsSettings: _*)
   .enablePlugins(SbtPluginPlugins)
   .settings(
+    name := "lagom-descriptor-generator-sbt-plugin",
     sbtPlugin := true,
-    bintraySettings,
-    releaseSettings,
-    commonScalariformSettings,
-    commonSettings,
     publishTo := {
       if (isSnapshot.value) {
-//         Bintray doesn't support publishing snapshots, publish to Sonatype snapshots instead
+        //         Bintray doesn't support publishing snapshots, publish to Sonatype snapshots instead
         Some(Opts.resolver.sonatypeSnapshots)
       } else publishTo.value
-    }
+    },
+    publishMavenStyle := isSnapshot.value
   ).dependsOn(`runner`)
 
 lazy val `runner` = project
