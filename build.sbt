@@ -9,7 +9,7 @@ import de.heikoseeberger.sbtheader._
 
 
 lazy val `root` = (project in file("."))
-  .enablePlugins(AutomateHeaderPlugin && PluginsAccessor.exclude(BintrayPlugin))
+  .enablePlugins(AutomateHeaderPlugin && PluginsAccessor.exclude(BintrayPlugin) && PluginsAccessor.exclude(Sonatype))
   .settings(name := "sbt-lagom-descriptor-generator")
   .aggregate(
     `generator-api`,
