@@ -56,7 +56,6 @@ lazy val `lagom-descriptor-generator-sbt-plugin` = project
   .settings(sbtPluginSettings)
   .settings(
     name := "lagom-descriptor-generator-sbt-plugin",
-    bintrayPackage := "lagom-descriptor-generator-sbt-plugin",
     sbtPlugin := true,
     publishTo := {
       if (isSnapshot.value) {
