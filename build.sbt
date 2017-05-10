@@ -18,7 +18,7 @@ lazy val commonSettings =
 // --------------- ROOT ------------------
 
 lazy val `sbt-lagom-descriptor-generator` = (project in file("."))
-  .enablePlugins(AutomateHeaderPlugin)
+  .enablePlugins(RuntimeLibPlugins)
   .settings(name := "sbt-lagom-descriptor-generator")
   .aggregate(
     `lagom-descriptor-generator-api`,
@@ -33,9 +33,7 @@ lazy val `sbt-lagom-descriptor-generator` = (project in file("."))
     publishLocal := {},
     publishArtifact in Compile := false,
     publish := {}
-  ).settings(
-  version := version.value
-)
+  )
 
 // ---------------   PROJECTS   ---------------
 
