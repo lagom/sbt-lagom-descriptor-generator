@@ -67,6 +67,7 @@ object Settings {
     Seq(
       bintrayOrganization := Some("lagom"),
       bintrayRepository := "sbt-plugin-releases",
+      bintrayPackage := "lagom-descriptor-generator-sbt-plugin",
       bintrayReleaseOnPublish := true
     )
 
