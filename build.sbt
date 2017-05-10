@@ -31,7 +31,8 @@ lazy val `sbt-lagom-descriptor-generator` = (project in file("."))
   .settings(sbtPluginSettings: _*)
   .settings(
     publishLocal := {},
-    publishArtifact in Compile := false
+    publishArtifact in Compile := false,
+    publish := {}
   )
 
 // ---------------   PROJECTS   ---------------
