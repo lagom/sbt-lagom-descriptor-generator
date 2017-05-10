@@ -1,27 +1,24 @@
 
 import sbt.Keys.{ crossScalaVersions, homepage, libraryDependencies }
-import sbt.PluginsAccessor
 
 
 // ---------------   SETTINGS   ---------------
 
 lazy val commonSettings =
-  Settings.headerLicenseSettings ++
-    Settings.commonScalariformSettings ++
-    Seq(
-      organization := "com.lightbend.lagom",
-      licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html")),
-      homepage := Some(url("https://github.com/lagom/sbt-lagom-descriptor-generator")),
-      sonatypeProfileName := "com.lightbend",
-      // Scala settings
-      scalaVersion := Version.scala,
-      crossScalaVersions := List(scalaVersion.value, "2.10.6")
-    )
+  Seq(
+    organization := "com.lightbend.lagom",
+    licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html")),
+    homepage := Some(url("https://github.com/lagom/sbt-lagom-descriptor-generator")),
+    sonatypeProfileName := "com.lightbend",
+    // Scala settings
+    scalaVersion := Version.scala,
+    crossScalaVersions := List(scalaVersion.value, "2.10.6")
+  )
 
 // --------------- ROOT ------------------
 
 lazy val root = (project in file("."))
-  .enablePlugins(AutomateHeaderPlugin && PluginsAccessor.exclude(Sonatype) && PluginsAccessor.exclude(BintrayPlugin))
+  .enablePlugins(AutomateHeaderPlugin && Sonatype && BintrayPlugin)
   .settings(name := "sbt-lagom-descriptor-generator")
   .aggregate(
     `lagom-descriptor-generator-api`,
@@ -31,7 +28,7 @@ lazy val root = (project in file("."))
     `lagom-descriptor-generator`,
     `lagom-descriptor-generator-sbt-plugin`
   )
-  .settings(commonSettings: _*)
+  .settings(librarySettings: _*)
   .settings(
     publishLocal := {},
     publishArtifact in Compile := false,
@@ -44,6 +41,8 @@ def RuntimeLibPlugins = AutomateHeaderPlugin && Sonatype && PluginsAccessor.excl
 def SbtPluginPlugins = AutomateHeaderPlugin && BintrayPlugin && PluginsAccessor.exclude(Sonatype)
 
 lazy val librarySettings = commonSettings ++
+  Settings.headerLicenseSettings ++
+  Settings.commonScalariformSettings ++
   Settings.publishMavenStyleSettings ++
   Settings.releaseSettings
 

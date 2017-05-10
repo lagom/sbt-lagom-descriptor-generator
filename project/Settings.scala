@@ -68,7 +68,7 @@ object Settings {
       bintrayOrganization := Some("lagom"),
       bintrayRepository := "sbt-plugin-releases",
       bintrayPackage := "lagom-descriptor-generator-sbt-plugin",
-      bintrayReleaseOnPublish := true
+      bintrayReleaseOnPublish := false
     )
 
   def publishMavenStyleSettings = Seq(
