@@ -17,7 +17,7 @@ lazy val commonSettings =
 
 // --------------- ROOT ------------------
 
-lazy val `sbt-lagom-descriptor-generator` = (project in file("."))
+lazy val root = (project in file("."))
   .enablePlugins(RuntimeLibPlugins)
   .settings(name := "sbt-lagom-descriptor-generator")
   .aggregate(
