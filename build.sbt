@@ -18,7 +18,7 @@ lazy val commonSettings =
 // --------------- ROOT ------------------
 
 lazy val root = (project in file("."))
-  .enablePlugins(RuntimeLibPlugins)
+  .enablePlugins(AutomateHeaderPlugin)
   .settings(name := "sbt-lagom-descriptor-generator")
   .aggregate(
     `lagom-descriptor-generator-api`,
@@ -29,7 +29,6 @@ lazy val root = (project in file("."))
     `lagom-descriptor-generator-sbt-plugin`
   )
   .settings(librarySettings: _*)
-  .settings(Settings.bintraySettings: _*) // roo tproject needs bintray Settings
   .settings(
     publishLocal := {},
     publishArtifact in Compile := false,
