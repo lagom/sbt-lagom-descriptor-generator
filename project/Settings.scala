@@ -68,9 +68,6 @@ object Settings {
       bintrayOrganization := Some("lagom"),
       bintrayRepository := "sbt-plugin-releases",
       bintrayPackage := "lagom-descriptor-generator-sbt-plugin",
-//      bintrayVersionAttributes ~= ((_: bintray.AttrMap) ++ Map("tested-on" -> Seq())),
-      bintrayVersionAttributes ~=
-        ((_: bintry.Attr.AttrMap) ++ Map("my-version-attr" -> Seq(bintry.Attr.String("lagom_1.4.0-SNAPSHOT")))),
       bintrayReleaseOnPublish := true
     )
 
