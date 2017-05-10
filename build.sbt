@@ -33,6 +33,9 @@ lazy val root = (project in file("."))
     publishLocal := {},
     publishArtifact in Compile := false,
     publish := {}
+  ).
+  settings(
+    version := version.value
   )
 
 // ---------------   PROJECTS   ---------------
