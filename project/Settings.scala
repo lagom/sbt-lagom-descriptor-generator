@@ -71,7 +71,7 @@ object Settings {
     )
 
   def publishMavenStyleSettings = Seq(
-    publishMavenStyle := true
+    publishMavenStyle := false
   )
 
   def releaseSettings: Seq[Setting[_]] = Seq(
