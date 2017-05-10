@@ -29,6 +29,7 @@ lazy val root = (project in file("."))
     `lagom-descriptor-generator-sbt-plugin`
   )
   .settings(librarySettings: _*)
+  .settings(Settings.bintraySettings: _*) // roo tproject needs bintray Settings
   .settings(
     publishLocal := {},
     publishArtifact in Compile := false,
