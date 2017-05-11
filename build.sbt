@@ -35,22 +35,24 @@ lazy val root = (project in file("."))
     publish := {}
   ).
   settings(
+    // this is required during release because for some reason the version value is not available.
     version := version.value
   )
 
 // ---------------   PROJECTS   ---------------
 
-def RuntimeLibPlugins = AutomateHeaderPlugin && Sonatype && PluginsAccessor.exclude(BintrayPlugin)
-def SbtPluginPlugins = AutomateHeaderPlugin && BintrayPlugin && PluginsAccessor.exclude(Sonatype)
+def RootPlugins        = AutomateHeaderPlugin && Sonatype                          && BintrayPlugin
+def RuntimeLibPlugins  = AutomateHeaderPlugin && Sonatype                          && PluginsAccessor.exclude(BintrayPlugin)
+def SbtPluginPlugins   = AutomateHeaderPlugin && PluginsAccessor.exclude(Sonatype) && BintrayPlugin
 
 lazy val librarySettings = commonSettings ++
   Settings.headerLicenseSettings ++
   Settings.commonScalariformSettings ++
-  Settings.publishMavenStyleSettings ++
+  Settings.bintraySettings ++
   Settings.releaseSettings
 
 lazy val sbtPluginSettings = librarySettings ++
-  Settings.bintraySettings ++
+  Settings.publishMavenStyleSettings ++
   Settings.scriptedTestsSettings
 
 lazy val `lagom-descriptor-generator-sbt-plugin` = project
