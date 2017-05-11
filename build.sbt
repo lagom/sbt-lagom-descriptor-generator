@@ -36,7 +36,8 @@ lazy val root = (project in file("."))
   ).
   settings(
     // this is required during release because for some reason the version value is not available.
-    version := version.value
+    version := version.value,
+    bintrayPackage := bintrayPackage.value
   )
 
 // ---------------   PROJECTS   ---------------
