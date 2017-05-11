@@ -28,3 +28,6 @@ def common = Seq(
   javacOptions in compile += "-parameters"
 )
 
+
+lagomCassandraEnabled in ThisBuild := false
+lagomKafkaEnabled in ThisBuild := false

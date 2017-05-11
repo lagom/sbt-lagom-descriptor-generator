@@ -43,3 +43,7 @@ InputKey[Unit]("assertFileContains") := {
     case e: Exception => ()
   }
 }
+
+
+lagomCassandraEnabled in ThisBuild := false
+lagomKafkaEnabled in ThisBuild := false
