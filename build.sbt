@@ -12,7 +12,23 @@ lazy val commonSettings =
     sonatypeProfileName := "com.lightbend",
     // Scala settings
     scalaVersion := Version.scala,
-    crossScalaVersions := List(scalaVersion.value, "2.10.6")
+    crossScalaVersions := List(scalaVersion.value, "2.10.6"),
+
+    pomExtra := {
+      <scm>
+        <url>https://github.com/lagom/sbt-lagom-descriptor-generator</url>
+        <connection>scm:git:git@github.com:lagom/sbt-lagom-descriptor-generator.git</connection>
+      </scm>
+        <developers>
+          <developer>
+            <id>lagom</id>
+            <name>Lagom Contributors</name>
+            <url>https://github.com/lagom</url>
+          </developer>
+        </developers>
+    },
+    pomIncludeRepository := { _ => false }
+
   )
 
 // --------------- ROOT ------------------
