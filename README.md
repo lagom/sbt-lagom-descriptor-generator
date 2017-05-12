@@ -4,6 +4,30 @@
 
 An `sbt` plugin to generate Lagom Service Descriptor code (and related entities) provided a Swagger/OpenAPI specification.
 
+Usage
+-----
+
+Include the plugin dependency on your `project/plugins.sbt` file:
+
+```
+addSbtPlugin("com.lightbend.lagom" % "lagom-descriptor-generator-sbt-plugin" % "0.0.2")
+```
+
+and enable the plugin on your project in `build.sbt`:
+
+```
+lazy val ``service-api = (project in file("service-api"))
+  .enablePlugins(LagomJava && LagomOpenApiPlugin)
+  .settings(
+    libraryDependencies ++=
+      Seq(
+        lagomJavadslApi
+      )
+  )
+```
+
+The plugin will trigger the Java or Scala code generation depending on the dependencies included in your code.
+
 
 
 Project Status
