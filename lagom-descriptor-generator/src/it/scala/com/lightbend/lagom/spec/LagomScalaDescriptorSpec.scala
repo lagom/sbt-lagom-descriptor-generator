@@ -1,6 +1,7 @@
 package com.lightbend.lagom.spec
 
-import org.scalatest.{ FlatSpec, Matchers }
+import org.apache.commons.lang3.StringUtils
+import org.scalatest.{FlatSpec, Matchers}
 
 class LagomScalaDescriptorSpec extends FlatSpec with Matchers {
 
@@ -14,8 +15,9 @@ class LagomScalaDescriptorSpec extends FlatSpec with Matchers {
     val packageName = "com.example.pet.api"
     val inputStream = resource(s"$folder/swagger.json")
 
-    val generatedCode: String = LagomGenerators.openApiV2ToLagomScala(inputStream, packageName, "pet").descriptor.fileContents
-    val expected: String = loadContents(s"$folder/sample-scala-descriptor.txt")
+    val descriptor = LagomGenerators.openApiV2ToLagomScala(inputStream, packageName, "pet").descriptor
+    val generatedCode: String = StringUtils.normalizeSpace(descriptor.fileContents)
+    val expected: String = StringUtils.normalizeSpace(loadContents(s"$folder/sample-scala-descriptor.txt"))
     expected should be(generatedCode)
 
   }

@@ -4,6 +4,7 @@
 package com.lightbend.lagom.spec.render
 
 import java.io.File
+import java.util.regex.Matcher
 
 import com.lightbend.lagom.spec.LagomGeneratorTypes
 import com.lightbend.lagom.spec.LagomGeneratorTypes.{ GeneratedCode, Output }
@@ -30,6 +31,6 @@ object LagomJavaRender {
   }
 
   private def getPath(service: Service, className: String): String = {
-    s"${service.`package`.replaceAll("\\.", File.separator)}${File.separator}${className}.java"
+    s"${service.`package`.replaceAll("\\.", Matcher.quoteReplacement(File.separator))}${File.separator}${className}.java"
   }
 }
