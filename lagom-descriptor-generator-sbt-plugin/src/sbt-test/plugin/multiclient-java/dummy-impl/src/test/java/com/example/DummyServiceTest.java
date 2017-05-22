@@ -1,6 +1,7 @@
 package com.example;
 
 import akka.NotUsed;
+import com.example.api.DummyService;
 import com.lightbend.lagom.javadsl.api.ServiceCall;
 import org.junit.Test;
 

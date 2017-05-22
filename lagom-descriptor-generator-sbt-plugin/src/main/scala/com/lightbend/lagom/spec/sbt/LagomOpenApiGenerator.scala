@@ -59,7 +59,7 @@ object LagomOpenApiGenerator {
   }
 
   private def writeFile(folder: File, content: GeneratedCode): File =
-    ResourceUtils.writeFile(folder, content.filename, content.fileContents)
+    ResourceUtils.writeFile(folder, content.relativeFile, content.fileContents)
 
   private def extractServiceName(filename: String): String = {
     filename.reverse.dropWhile(_ != '.').drop(1).reverse

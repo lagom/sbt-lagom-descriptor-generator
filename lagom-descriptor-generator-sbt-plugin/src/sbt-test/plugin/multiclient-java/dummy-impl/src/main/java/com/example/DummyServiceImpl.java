@@ -4,10 +4,10 @@
 package com.example;
 
 import akka.NotUsed;
+import com.example.api.DummyService;
 import com.lightbend.lagom.javadsl.api.ServiceCall;
 
 import javax.inject.Inject;
-import java.util.concurrent.CompletionStage;
 
 /**
  * Implementation of the HelloService.
@@ -22,7 +22,6 @@ public class DummyServiceImpl implements DummyService {
         this.s1 = s1;
         this.s2 = s2;
     }
-
 
     @Override
     public ServiceCall<NotUsed, String> dummy() {

@@ -31,7 +31,13 @@ object LagomScalaRender {
     Output(GeneratedCode(descriptorFileName, descriptor), customModels)
   }
 
-  private def getPath(service: Service, className: String): String = {
-    s"${service.`package`.replaceAll("\\.", Matcher.quoteReplacement(File.separator))}${File.separator}${className}.scala"
+  /**
+   * @return a relative path to the file.
+   */
+  private def getPath(service: Service, className: String): File = {
+    val packageSplits = service.`package`.split("\\.")
+    val directory: File = packageSplits.tail.foldLeft(new File(packageSplits.head))((acc, x) => new File(acc, x))
+    new File(directory, s"${className}.scala")
   }
+
 }

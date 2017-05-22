@@ -3,6 +3,7 @@
  */
 package com.example;
 
+import com.example.api.DummyService;
 import com.google.inject.AbstractModule;
 import com.lightbend.lagom.javadsl.server.ServiceGuiceSupport;
 
@@ -12,7 +13,7 @@ import com.lightbend.lagom.javadsl.server.ServiceGuiceSupport;
 public class DummyModule extends AbstractModule implements ServiceGuiceSupport {
   @Override
   protected void configure() {
-    bindServices(serviceBinding(DummyService.class, DummyServiceImpl.class));
+    bindService(DummyService.class, DummyServiceImpl.class);
     bindClient(Swagger1Api.class);
     bindClient(Swagger2Api.class);
   }

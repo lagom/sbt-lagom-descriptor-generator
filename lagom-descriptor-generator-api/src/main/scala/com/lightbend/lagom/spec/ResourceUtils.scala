@@ -48,12 +48,12 @@ object ResourceUtils {
 
   /**
    * @param folder an absolute folder
-   * @param filename a relative path to a file (may contain File.separators)
+   * @param relativeFile a relative path to a file
    * @param fileContents
    * @return
    */
-  def writeFile(folder: File, filename: String, fileContents: String): File = {
-    val path = Paths.get(folder.getAbsolutePath, filename)
+  def writeFile(folder: File, relativeFile: File, fileContents: String): File = {
+    val path = Paths.get(folder.getAbsolutePath, relativeFile.getPath)
     // `path` is tha absolute route to the file so only path.parent must be created as directories
     Files.createDirectories(path.getParent)
     Files.write(

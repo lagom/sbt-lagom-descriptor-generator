@@ -1,4 +1,4 @@
-package com.example;
+package com.example.api;
 
 import com.lightbend.lagom.javadsl.api.Descriptor;
 import com.lightbend.lagom.javadsl.api.Service;

@@ -3,12 +3,12 @@
  */
 package com.lightbend.lagom.spec
 
-import java.io.InputStream
+import java.io.{ File, InputStream }
 
 import com.lightbend.lagom.spec.model.{ CustomType, Service }
 
 object LagomGeneratorTypes {
-  case class GeneratedCode(filename: String, fileContents: String)
+  case class GeneratedCode(relativeFile: File, fileContents: String)
   case class Output(descriptor: GeneratedCode, models: Map[String, GeneratedCode])
   type ModelRender = (Service, CustomType) => String
   type DescriptorRender = Service => String
