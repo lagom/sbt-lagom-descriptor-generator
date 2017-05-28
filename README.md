@@ -57,7 +57,7 @@ intermediate representation (e.g. to map JSON Schema's `dateTime` to `org.joda.t
 
 ### Supported Specs
 
-**OpenAPI V2** placing JSON of YAML OpenAPI V2 files in a project's `src/main/openapi` will generate the required code to represent that spec using Lagom code. See the `scripted` tests for an [example](https://github.com/lagom/sbt-lagom-descriptor-generator/blob/1c312cee7e2aa61fd4206b277d87d15309c5d2dd/lagom-descriptor-generator-sbt-plugin/src/sbt-test/plugin/multiclient-java/dummy-impl/src/main/openapi/swagger1.yaml#L27-L26).
+**OpenAPI V2** placing JSON or YAML OpenAPI V2 files in a project's `src/main/openapi` will generate the required code to represent that spec using Lagom code. See the `scripted` tests for an [example](https://github.com/lagom/sbt-lagom-descriptor-generator/blob/1c312cee7e2aa61fd4206b277d87d15309c5d2dd/lagom-descriptor-generator-sbt-plugin/src/sbt-test/plugin/multiclient-java/dummy-impl/src/main/openapi/swagger1.yaml#L27-L26).
 
 Supporting new spec formats would require:
 
