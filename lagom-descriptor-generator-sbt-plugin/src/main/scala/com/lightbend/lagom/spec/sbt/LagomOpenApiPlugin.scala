@@ -28,7 +28,7 @@ object LagomOpenApiPlugin extends AutoPlugin {
     target in lagomOpenAPIGenerateDescriptor :=
       crossTarget.value / "openapi" / Defaults.nameForSrc(configuration.value.name),
     lagomOpenAPIGenerateDescriptor := LagomOpenApiGenerator.lagomOpenAPIGenerateDescriptorTask().value,
-    sourceGenerators <+= lagomOpenAPIGenerateDescriptor,
+    sourceGenerators += Def.task { lagomOpenAPIGenerateDescriptor.value },
     // TODO: review managedSources
     managedSourceDirectories += (target in lagomOpenAPIGenerateDescriptor).value / "java",
     unmanagedResourceDirectories += (resourceDirectory in lagomOpenAPIGenerateDescriptor).value,
@@ -41,14 +41,14 @@ object LagomOpenApiPlugin extends AutoPlugin {
         managedSourceDirectories := Nil,
         unmanagedSourceDirectories := Seq(sourceDirectory.value),
         sourceDirectories := unmanagedSourceDirectories.value ++ managedSourceDirectories.value,
-        unmanagedSources <<= Defaults.collectFiles(sourceDirectories, includeFilter, excludeFilter),
+        unmanagedSources := Defaults.collectFiles(sourceDirectories, includeFilter, excludeFilter).value,
         managedSources := Nil,
         sources := managedSources.value ++ unmanagedSources.value,
 
         managedResourceDirectories := Nil,
         unmanagedResourceDirectories := Seq(resourceDirectory.value),
         resourceDirectories := unmanagedResourceDirectories.value ++ managedResourceDirectories.value,
-        unmanagedResources <<= Defaults.collectFiles(resourceDirectories, includeFilter, excludeFilter),
+        unmanagedResources := Defaults.collectFiles(resourceDirectories, includeFilter, excludeFilter).value,
         managedResources := Nil,
         resources := managedResources.value ++ unmanagedResources.value
 
