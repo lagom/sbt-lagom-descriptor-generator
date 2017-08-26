@@ -180,7 +180,8 @@ class OpenApiV2Parser(packageName: String, serviceName: String) extends SpecPars
         }
 
     val arguments = (pathParams(operation) ++ queryParams(operation)).map { param =>
-      CallArgument(param.getName, paramTypeDiscovery(param.getName, param.asInstanceOf[AbstractSerializableParameter[_]]))
+      val arg = CallArgument(param.getName, paramTypeDiscovery(param.getName, param.asInstanceOf[AbstractSerializableParameter[_]]))
+      if (param.getRequired) arg else arg.copy(`type` = LOptional(arg.`type`))
     }
 
     // TODO: normalize operationId name to a valid java/scala method name.
